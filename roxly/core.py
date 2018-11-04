@@ -27,7 +27,7 @@ import sys
 import os
 import random
 import filecmp
-import ConfigParser
+import configparser
 import string
 import json
 import itertools
@@ -363,7 +363,7 @@ class Oxly():
         path = os.path.expanduser(self.conf)
         if not os.path.isfile(path):
             sys.exit('error: conf file not found: %s' % self.conf)
-        cf = ConfigParser.RawConfigParser()
+        cf = configparser.RawConfigParser()
         cf.read(path)
         return cf.get('misc', key)
 
@@ -831,7 +831,7 @@ class Oxly():
             sys.exit('Warning: you can still do a 2-way merge if necessary (oxly merge2 --help).')
             sys.exit(1)
         f_anc = self._get_pname_wdrev_ln(filepath, anc_rev, suffix=':ANCESTOR')
-        qs = lambda(s): '\"' + s + '\"'
+        qs = lambda s: '\"' + s + '\"'
         (fa, fb) = self._get_diff_pair(reva, revb, filepath)
         if mergerc_cmd:
             shcmd = mergerc_cmd % (qs(fa), qs(fb), qs(f_anc))  # quotes cant hurt, eh?
@@ -863,7 +863,7 @@ class Oxly():
         """
         self._pull_me_maybe(reva.lower(), filepath)
         self._pull_me_maybe(revb.lower(), filepath)
-        qs = lambda(s): '\"' + s + '\"'
+        qs = lambda s: '\"' + s + '\"'
         (fa, fb) = self._get_diff_pair(reva.lower(), revb.lower(), filepath)
         if merge_cmd:
             shcmd = merge_cmd % (qs(fa), qs(fb))  # quotes cant hurt, eh?
