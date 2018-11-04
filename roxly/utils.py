@@ -34,7 +34,8 @@ def utc_to_localtz(dt_str):
     return dt_local.strftime("%Y-%m-%d %H:%M:%S %Z%z")
 
 #from __future__ import absolute_import, division, print_function, unicode_literals
-from dropbox_content_hasher import DropboxContentHasher
+#gbpy3 from dropbox_content_hasher import DropboxContentHasher
+from roxly.dropbox_content_hasher import DropboxContentHasher
 
 def calc_dropbox_content_hash(fname):
     hasher = DropboxContentHasher()
