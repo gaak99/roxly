@@ -6,7 +6,7 @@ setup(
     version='0.0.0',
     packages=find_packages(),
     include_package_data=True,
-    python_requires=">=3.5"
+    python_requires=">=3.5",
     install_requires=[
         'Click',
         #'dropbox>=7.2.1',
