@@ -127,7 +127,8 @@ class Roxly():
             os.remove(log_path)
         make_sure_path_exists(os.path.dirname(log_path))
         hrdb = pickledb.load(hrdb_path, 'False')
-        with open(os.path.expanduser(log_path), "wb") as logf:
+        #gbpy3 with open(os.path.expanduser(log_path), "wb") as logf:
+        with open(os.path.expanduser(log_path), "w") as logf:
             for md in md_l:
                 logf.write('%s%s%s%s%s%s%s\n' % (md.rev, ROXLYSEP1,
                                              md.server_modified,
@@ -515,11 +516,12 @@ class Roxly():
         return get_relpaths_recurse(wt_dir)
 
     def _scrub_fnames(self, fp_l):
-        ifp_l = itertools.ifilterfalse(lambda x: x.startswith('.roxly'), fp_l)
+        #gbpy3 ifp_l = itertools.ifilterfalse(lambda x: x.startswith('.roxly'), fp_l)
+        ifp_l = itertools.filterfalse(lambda x: x.startswith('.roxly'), fp_l)
         if not ifp_l:
             return None
         # emacs prev version
-        ifp_l = itertools.ifilterfalse(lambda x: x.endswith('~'), ifp_l)
+        ifp_l = itertools.filterfalse(lambda x: x.endswith('~'), ifp_l)
         if not ifp_l:
             return None
         return ifp_l
