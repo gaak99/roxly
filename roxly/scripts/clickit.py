@@ -61,6 +61,17 @@ def reset(roxly, filepath):
 def clone(roxly, dry_run, src, nrevs, init_ancdb):
     roxly.clone(dry_run, src, nrevs, init_ancdb)
 
+##roxme    
+@cli.command(help='Download revisions of Dropbox file to local dir/repo and checkout HEAD to working dir. Local dir default is $PWD but can be set (see global opts), SRC format: dropbox://<orgzly>/[/<subdirs>/]<file.org>')
+@click.option('--dry-run/--no-dry-run', default=False)
+@click.option('--nrevs',
+              help='Number of latest metadata of revisions (defaults to 50) to download from Dropbox.',
+              required=False, default=NREVS_MAX)
+@click.argument('src')
+@click.pass_obj
+def rox_clone(roxly, dry_run, src, nrevs):
+    roxly.rox_clone(dry_run, src, nrevs)
+    
 @cli.command(help='Run diff(1) to display the data differences of two revisions.')
 @click.option('--diff-cmd', required=False,
               envvar='DIFF_CMD',
@@ -174,17 +185,24 @@ def getmetameta(roxly, key):
 def calchash(roxly, filepath):
     roxly.calc_dropbox_hash(filepath)
 
-@cli.command(help='Calculate and set Dropbox filesMetaData content_hash into ancestor db locally.')
-@click.argument('filepath')
-@click.pass_obj
-def ancdb_set(roxly, filepath):
-    roxly.ancdb_set(filepath)
+# @cli.command(help='Calculate and set Dropbox filesMetaData content_hash into ancestor db locally.')
+# @click.argument('filepath')
+# @click.pass_obj
+# def ancdb_set(roxly, filepath):
+#     roxly.ancdb_set(filepath)
 
-@cli.command(help='Get Dropbox filesMetaData content_hash from local copy of ancestor db.')
-@click.argument('filepath')
-@click.pass_obj
-def ancdb_get(roxly, filepath):
-    roxly.ancdb_get(filepath)
+# ##roxme - no prop local?
+# @cli.command(help='Calculate and set Dropbox filesMetaData content_hash into ancestor db locally.')
+# @click.argument('filepath')
+# @click.pass_obj
+# def ancprop_set(roxly, filepath):
+#     roxly.ancprop_set(filepath)
+    
+# @cli.command(help='Get Dropbox filesMetaData content_hash from local copy of ancestor db.')
+# @click.argument('filepath')
+# @click.pass_obj
+# def ancdb_get(roxly, filepath):
+#     roxly.ancdb_get(filepath)
 
 @cli.command(help='Calc/Set dropbox hash in local ancestor db and upload ancestor db to Dropbox.')
 @click.argument('filepath')

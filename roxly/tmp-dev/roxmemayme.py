@@ -15,17 +15,20 @@ if __name__ == '__main__':
     ## clone --ancdb-init
     #print('roxmemayme: clone --ancdb-init')
     dry_run=False
-    src='dropbox://testdir2/roxly-test0.org'
     nrevs=2
-    init_ancdb=True
+    #init_ancdb=True
+    #src='dropbox://testdir2/roxly-test0.org'
     #roxme.clone(dry_run, src, nrevs, init_ancdb)
+    src='dropbox://testdir3/roxme1.txt'
+    roxme.rox_clone(dry_run, src, nrevs)
 
     ## status
-    filepath='testdir2/roxly-test0.org'
-    roxme.status(filepath)
+    #filepath='testdir2/roxly-test0.org'
+    filepath='testdir3/roxme1.txt'
+    #roxme.status(filepath)
 
     ## metameta
-    key=None
+    key='ancestor_rev'
     roxme.getmm(key)
     
     ## log
@@ -55,4 +58,4 @@ if __name__ == '__main__':
     dry_run=True
     add=True
     post_push_clone=False
-    roxme.push(dry_run, add, post_push_clone, filepath)
+    #roxme.push(dry_run, add, post_push_clone, filepath)

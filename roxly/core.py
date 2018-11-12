@@ -71,6 +71,12 @@ DIFF3_BIN = 'diff3'
 DIFF3_BIN_ARGS = '-m'
 ANCDBNAME = '_roxly_ancestor_pickledb.json'
 
+
+## dbxlabs
+#ROXLY_TEMPL_NAME = 'Roxly'
+#ROXLY_TEMPL_DESC = 'These properties hold the ancestor Dropbox revision of this file.'
+ROXLY_PROP_TEMPLATE_ID = 'ptid:uDbBKfpJCRUAAAAAAAADww'
+
 class Roxly():
     """Roxly class -- use the Dropbox API to observ/merge
           diffs of any two Dropbox file revisions
@@ -380,7 +386,7 @@ class Roxly():
         self.mmdb.set('ancdb_path', ancdb_path)
         self.mmdb.set('nrevs', nrevs)
         self.mmdb.dump()
-
+        
     def clone(self, dry_run, src_url, nrevs, init_ancdb, dl_ancdb=True):
         """Given a dropbox url for one file*, fetch the
         n revisions of the file and store locally in repo's
@@ -475,6 +481,105 @@ class Roxly():
                 print('Checking ancestor rev data ...')
                 self.pull(rev, filepath)
 
+    def _rox_mmdb_populate(self, src_url, nrevs, ancrev):
+        # Concoct&save orgzly_dir&ancdb path
+        # ancdb per dir or one per tree??? --later
+        orgzly_dir = src_url.split('//')[1].split('/')[0] #top dir only
+        ancdb_path = orgzly_dir + '/' + ANCDBNAME
+
+        # Save meta meta & update master file path list
+        self.mmdb.set('remote_origin', src_url)
+        self.mmdb.set('orgzly_dir', orgzly_dir)
+        #self.mmdb.set('ancdb_path', ancdb_path)
+        self.mmdb.set('ancestor_rev', ancrev)
+        self.mmdb.set('nrevs', nrevs)
+        self.mmdb.dump()
+
+    @_dbxauth
+    def _rox_alpha_get_metadata(self, path, prop_templates):
+        self._debug('debug: alpha_get_metadata')
+        try:
+            res = self.dbx.files_alpha_get_metadata(path, include_property_templates=prop_templates)
+        except Exception as err:
+            sys.exit('Call to Dropbox failed: %s' % err)
+        return res
+
+    def _rox_ancrev_get(self, filepath, template_id):
+        self._debug('debug: _rox_ancrev_get %s, %s' % (filepath, template_id))
+        res = self._rox_alpha_get_metadata(filepath, [template_id])
+        self._debug('debug: _rox_ancrev_get res.name=%s' % (res.name))
+        pg = res.property_groups
+        self._debug('debug: _rox_ancrev_get res.property_groups=%s' % (pg))
+        # print('res prop_group k=%s, v=%s' %
+        #       (res.property_groups[0].fields[0].name,
+        #        res.property_groups[0].fields[0].value))
+        if not pg:
+            return '<null>'
+        #if not pg[0].fields:
+        #    return '<nullfields>'
+
+        return pg[0].fields[0].value
+    
+    def rox_clone(self, dry_run, src_url, nrevs):
+        """Given a dropbox url for one file*, fetch the
+        n revisions of the file and store locally in repo's
+        .roxly dir and checkout HEAD to working dir.
+        *current limit -- might be expanded
+        """
+        nrevs = int(nrevs)
+        self._debug('debug clone: nrevs=%d' % (nrevs))
+
+        if nrevs > NREVS_MAX:
+            print('Warning: max number of revisions for free service is %s' % NREVS_MAX)
+
+        if dry_run:
+            print('clone dry-run: remote repo = %s' % src_url)
+            print('clone dry-run: local repo = %s' % self.repo)
+            sys.exit(0)
+
+        self.init()
+
+        # src_url should-not-must be a dropbox url for chrimony sakes
+        filepath = src_url.lower()  # XXX dbx case insensitive
+        if filepath.startswith('dropbox://'):
+            filepath = filepath[len('dropbox:/'):]  # keep single leading slash
+        if not filepath.startswith('/') or filepath.endswith('/'):
+            print('error: URL must have leading slash and no trailing slash')
+            sys.exit(1)
+
+        pl = filepath.split('/')
+        if len(pl) < 3:
+            sys.exit('Error: url form is dropbox://<orgzly>/[/<subdirs>/]<file.org>')
+        
+        repo_home = self._get_pname_home_base() + filepath
+        repo_home_dir = os.path.dirname(os.path.expanduser(repo_home))
+        make_sure_path_exists(repo_home_dir)
+
+        ancrev = self._rox_ancrev_get(filepath, ROXLY_PROP_TEMPLATE_ID)
+        self._rox_mmdb_populate(src_url, nrevs, ancrev)
+
+        self._repohome_files_put(filepath.strip('/'))
+
+        # Finally! download the revs data and checkout themz to wt
+        self._debug('debug clone: download %d revs of %s to %s' % (nrevs,
+                                                                   filepath,
+                                                                   self.repo))
+        # Get revs' metadata
+        print("Downloading metadata of %d (max) latest revisions on Dropbox ..." %
+              nrevs, end='')
+        md_l = self._get_revs_md(filepath, nrevs)
+        print(' done.')
+        self._log_revs_md(md_l,
+                          self._get_pname_logpath(filepath),
+                          self._get_pname_hrdbpath(filepath))
+        print('Checking 2 latest revisions in Dropbox...')
+        self.pull(md_l[0].rev, filepath)
+        if len(md_l) > 1:
+            self.pull(md_l[1].rev, filepath)
+        else:
+            print('\tonly one revision found.')
+        self.checkout(filepath)
+                
     def _add_one_path(self, path):
         # cp file from working tree to index tree dir
         index_path = self._get_pname_index()
