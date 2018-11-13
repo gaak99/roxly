@@ -20,7 +20,7 @@ if __name__ == '__main__':
     #src='dropbox://testdir2/roxly-test0.org'
     #roxme.clone(dry_run, src, nrevs, init_ancdb)
     src='dropbox://testdir3/roxme1.txt'
-    roxme.rox_clone(dry_run, src, nrevs)
+    #roxme.rox_clone(dry_run, src, nrevs)
 
     ## status
     #filepath='testdir2/roxly-test0.org'
@@ -55,7 +55,9 @@ if __name__ == '__main__':
     #roxme.merge(dry_run, merge_cmd, reva, revb, filepath)
     
     ## push
-    dry_run=True
+    #dry_run=True
+    dry_run=False
     add=True
     post_push_clone=False
     #roxme.push(dry_run, add, post_push_clone, filepath)
+    #roxme.rox_push(dry_run, add, post_push_clone, filepath)

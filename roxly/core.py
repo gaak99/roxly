@@ -37,6 +37,8 @@ from functools import wraps
 import dropbox
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError, AuthError
+##rox
+from dropbox.file_properties import PropertyFieldTemplate, PropertyType, PropertyField, PropertyGroup, PropertyGroupUpdate
 from .utils import make_sure_path_exists, get_relpaths_recurse, utc_to_localtz
 from .utils import calc_dropbox_content_hash
 
@@ -76,6 +78,7 @@ ANCDBNAME = '_roxly_ancestor_pickledb.json'
 #ROXLY_TEMPL_NAME = 'Roxly'
 #ROXLY_TEMPL_DESC = 'These properties hold the ancestor Dropbox revision of this file.'
 ROXLY_PROP_TEMPLATE_ID = 'ptid:uDbBKfpJCRUAAAAAAAADww'
+ROXLY_PROP_ANCREV_NAME = 'ancestor_rev'
 
 class Roxly():
     """Roxly class -- use the Dropbox API to observ/merge
@@ -1197,6 +1200,117 @@ class Roxly():
             self._save_repo()
             print('Re-cloning to get current metadata/data from Dropbox...')
             self.clone(dry_run, dropbox_url, nrevs, dl_ancdb=False)
+
+        # Our work is done here praise $DIETY as the user syncs on Orgzly.
+        print("\nPlease select Sync (regular, Forced not necessary) note on Orgzly now.")
+        print("It should be done before any other changes are saved to this file on Dropbox/Emacs/Orgzly.")
+
+    @_dbxauth
+    def _rox_push_one_path(self, path):
+        # Push a given path upstream
+        rem_path = '/' + path
+        index_dir = self._get_pname_index()
+        local_path = index_path = index_dir + '/' + path
+
+        # Skip if no change from current rev
+        logs = self._get_log(path)
+        head = logs[0]
+        (rev, date, size, hash) = head.split(ROXLYSEP1)
+        head_path = self._get_pname_by_rev(path, rev)
+        if filecmp.cmp(index_path, head_path):
+            print('Warning: no change between working dir version and HEAD (latest version cloned).')
+            sys.exit('Warning: so no push needed.')
+        self._debug('debug push one path: %s' % local_path)
+
+        hash = calc_dropbox_content_hash(local_path)
+        f = self._rox_ancrev_prop_group_factory(ROXLY_PROP_ANCREV_NAME)
+        pg = f(hash)
+
+        ancout = "(ancestor_rev=%s)" % (hash[:8])
+        with open(local_path, 'rb') as f:
+            print("Uploading staged " + path + " to Dropbox as " +
+                  rem_path + " " + ancout + " ...", end='')
+            try:
+                self.dbx.files_upload(f.read(), rem_path, mode=WriteMode('overwrite'),
+                                      property_groups=[pg])
+                print(' done.')
+            except ApiError as err:
+                # This checks for the specific error where a user doesn't have
+                # enough Dropbox space quota to upload this file
+                if (err.error.is_path() and
+                        err.error.get_path().error.is_insufficient_space()):
+                    sys.exit("ERROR: Cannot back up; insufficient space.")
+                elif err.user_message_text:
+                    print(err.user_message_text)
+                    sys.exit(100)
+                else:
+                    print(err)
+                    sys.exit(101)
+            except Exception as err:
+                sys.exit('Call to Dropbox to upload file data failed: %s' % err)
+
+        os.remove(index_path)
+        return hash
+
+    # def rox_get_ancrev(self, filepath):
+    #     return 'ancrevmemaybe'
+
+    ##gbrox utils.py?
+    def _rox_ancrev_prop_group_factory(self, ancrev_name):
+        #ancrev_field = PropertyField(ROXLY_PROP_ANCREV_NAME, ancrev)
+        #ancrev_prop_group = PropertyGroup(ROXLY_PROP_TEMPLATE_ID, [ancrev_field])
+        return lambda x: PropertyGroup(ROXLY_PROP_TEMPLATE_ID,
+                                  [PropertyField(ancrev_name, x)])
+
+    # def rox_get_ancrev_prop_group(self, ancrev):
+    #     ancrev_field = PropertyField(ROXLY_PROP_ANCREV_NAME, ancrev)
+    #     ancrev_prop_group = PropertyGroup(ROXLY_PROP_TEMPLATE_ID, [ancrev_field])
+    #     return ancrev_prop_group
+        
+    def rox_push(self, dry_run, add, post_push_clone, filepath):
+        """Push/upload staged file upstream to Dropbox.
+
+        post_push_clone -- bool -- normally after push completes
+           a clone is done to resync with Dropbox
+        """
+        fp_l = self._get_index_paths()
+        self._debug('debug push: %s' % fp_l)
+        if post_push_clone:
+                    self._debug('debug post_push_clone true')
+
+        if not filepath: #gbrox should prolly req 1 file? (>1 not a thing as hoped)
+            sys.exit('ERROR: pusha need a file bruh')
+        else:
+            if filepath not in [s.strip('./') for s in fp_l]:
+                if filepath.startswith('dropbox:'):
+                    print('Warning: file should be local path not url')
+                if not add:
+                    sys.exit('Warning: %s not in index. Try push --add.' % filepath)
+            if dry_run:
+                print('push dryrun add: %s' % add)
+                print('push dryrun filepath: %s' % filepath)
+                print('push dryrun from local repo: %s' % self.repo)
+                print('push dryrun to remote repo: %s' %
+                      self._get_mmval('remote_origin'))
+            else:
+                if add:
+                    self._add_one_path(filepath)
+                #ancrev = self.rox_get_ancrev(filepath)
+                #pg = self.rox_get_ancrev_prop_group(ancrev)
+                #self._rox_push_one_path(filepath, pg)
+                self._rox_push_one_path(filepath)
+                #print('Running ancdb_push ...') # in case it fails, user can rerun it
+                #self.ancdb_push(filepath)
+
+        if dry_run:
+            return
+
+        dropbox_url = self._get_mmval('remote_origin')
+        if dropbox_url and post_push_clone:
+            nrevs = self._get_mmval('nrevs')
+            self._save_repo()
+            print('Re-cloning to get current metadata/data from Dropbox...')
+            self.rox_clone(dry_run, dropbox_url, nrevs)
 
         # Our work is done here praise $DIETY as the user syncs on Orgzly.
         print("\nPlease select Sync (regular, Forced not necessary) note on Orgzly now.")
