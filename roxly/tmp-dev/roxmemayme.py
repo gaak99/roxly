@@ -15,7 +15,7 @@ if __name__ == '__main__':
     ## clone --ancdb-init
     #print('roxmemayme: clone --ancdb-init')
     dry_run=False
-    nrevs=2
+    nrevs=5
     #init_ancdb=True
     #src='dropbox://testdir2/roxly-test0.org'
     #roxme.clone(dry_run, src, nrevs, init_ancdb)
@@ -53,6 +53,12 @@ if __name__ == '__main__':
     merge_cmd=None
     #roxme.merge2(dry_run, emacsclient_path, merge_cmd, reva, revb, filepath)
     #roxme.merge(dry_run, merge_cmd, reva, revb, filepath)
+
+    ## merge3
+    dry_run=True
+    #emacsclient_path=None
+    merge_cmd=None
+    roxme.rox_merge3(dry_run, merge_cmd, reva, revb, filepath)
     
     ## push
     #dry_run=True

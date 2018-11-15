@@ -78,6 +78,7 @@ ANCDBNAME = '_roxly_ancestor_pickledb.json'
 #ROXLY_TEMPL_NAME = 'Roxly'
 #ROXLY_TEMPL_DESC = 'These properties hold the ancestor Dropbox revision of this file.'
 ROXLY_PROP_TEMPLATE_ID = 'ptid:uDbBKfpJCRUAAAAAAAADww'
+##gbrox  s/ancestor_rev/ancestor_hash ?? prolly
 ROXLY_PROP_ANCREV_NAME = 'ancestor_rev'
 
 class Roxly():
@@ -494,6 +495,7 @@ class Roxly():
         self.mmdb.set('remote_origin', src_url)
         self.mmdb.set('orgzly_dir', orgzly_dir)
         #self.mmdb.set('ancdb_path', ancdb_path)
+        ##gbrox s/ancestor_rev/ancestor_hash ??
         self.mmdb.set('ancestor_rev', ancrev)
         self.mmdb.set('nrevs', nrevs)
         self.mmdb.dump()
@@ -558,8 +560,10 @@ class Roxly():
         repo_home_dir = os.path.dirname(os.path.expanduser(repo_home))
         make_sure_path_exists(repo_home_dir)
 
+        ##gbrox s/ancrev/anchash ??
         ancrev = self._rox_ancrev_get(filepath, ROXLY_PROP_TEMPLATE_ID)
         self._rox_mmdb_populate(src_url, nrevs, ancrev)
+        self._debug('debug clone: downloaded ancestor hash=%s' % ancrev[:8])
 
         self._repohome_files_put(filepath.strip('/'))
 
@@ -910,6 +914,73 @@ class Roxly():
                 print('\t\t then run: roxly push --add %s' % (filepath))
             sys.exit(rt)
             
+    def rox_merge3(self, dry_run, merge_cmd, reva, revb, filepath):
+        """Run cmd for 3-way merge (aka auto-merge when possible)
+        """
+        reva = self._head2rev(filepath, reva)
+        revb = self._head2rev(filepath, revb)
+
+        self._pull_me_maybe(reva, filepath)
+        self._pull_me_maybe(revb, filepath)
+        (fa, fb) = self._get_diff_pair(reva, revb, filepath)
+        #ancdb = self._open_ancdb()
+        #hash = ancdb.get(filepath)
+        hash = self.mmdb.get('ancestor_rev') ##gbrox _hash
+        self._debug('debug merge3: ancestor_rev (hash)=%s' % hash)
+        if hash == None:
+            print('Warning hash==None: cant do a 3-way merge as ancestor revision not found.')
+            sys.exit('Warning: you can still do a 2-way merge (roxly merge2 --help).')
+        anc_rev = self._hash2rev(filepath, hash)
+        if anc_rev == None: #not enough revs downloaded 
+            print('Warning ancrev==None: cant do a 3-way merge as no ancestor revision found.')
+            sys.exit('Warning: you can still do a 2-way merge (roxly merge2 --help).')
+            sys.exit(1)
+
+        if reva == anc_rev:
+            print('Warning: reva %s == anc_rev %s' % (reva, anc_rev))
+            print('Warning: does not look like a merge is necessary. Try Sync on Orgzly.')
+            sys.exit('Warning: you can still do a 2-way merge if necessary (roxly merge2 --help).')
+        if revb == anc_rev:
+            print('Warning: revb %s == anc_rev %s' % (revb, anc_rev))
+            print('Warning: does not look like a merge is necessary, try Sync on Orgzly.')
+            sys.exit('Warning: you can still do a 2-way merge if necessary (roxly merge2 --help).')
+            sys.exit(1)
+        f_anc = self._get_pname_wdrev_ln(filepath, anc_rev, suffix=':ANCESTOR')
+        mcmd = margs = None
+        if merge_cmd:
+            mc = merge_cmd.split(' ')
+            mcmd = mc[0]
+            margs = mc[1:] if len(mc)>1 else []
+        mcmd = [mcmd] if mcmd else [DIFF3_BIN]
+        margs = margs if margs else [DIFF3_BIN_ARGS]
+        cmd3 = mcmd + margs + [fa, f_anc, fb]
+        self._debug('debug merge3: cmd3=%s' % cmd3)
+        if dry_run:
+            print('merge3 dry-run: %s' % cmd3)
+        tmpf = '/tmp/tmproxlymerge3.' + str(os.getpid())
+        fname = '/dev/null' if dry_run else tmpf
+        with open(fname, 'w') as fout:
+            rt = sp.call(cmd3, stdout=fout)
+            self._debug('debug merge3: rt=%d, fname=%s' % (rt, fname))
+            if dry_run:
+                print('merge3 dry-run: %s exit value=%d' % (cmd3[0], rt))
+                sys.exit(rt)
+            if rt > 1:
+                print('Error: diff3 returned %d' % rt)
+            if rt == 0:
+                os.system('mv %s %s' % (fname, filepath))
+                print('No conflicts found. File fully merged locally in %s'  % filepath)
+            if rt == 1:
+                fcon = filepath + ':CONFLICT'
+                os.system('mv %s %s' % (fname, fcon))
+                print('Conflicts found, pls run either ...')
+                print('\temacsclient ediff 3-way merge: roxly mergerc --reva %s --revb %s %s' % (reva, revb, filepath))
+                print('\t\t then run: roxly push --add %s' % (filepath))
+                print('\tedit diff3 output: $EDITOR %s' % (fcon))
+                print('\t\t then run: mv %s %s' % (fcon, filepath))
+                print('\t\t then run: roxly push --add %s' % (filepath))
+            sys.exit(rt)
+
     def merge3_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
         """Run mergerc_cmd to allow user to merge 3 revs.
 
@@ -1226,7 +1297,9 @@ class Roxly():
         f = self._rox_ancrev_prop_group_factory(ROXLY_PROP_ANCREV_NAME)
         pg = f(hash)
 
-        ancout = "(ancestor_rev=%s)" % (hash[:8])
+        ##gbrox  s/ancestor_rev/ancestor_hash
+        #ancout = "(ancestor_rev=%s)" % (hash[:8])
+        ancout = "(ancestor_hash=%s)" % (hash[:8])
         with open(local_path, 'rb') as f:
             print("Uploading staged " + path + " to Dropbox as " +
                   rem_path + " " + ancout + " ...", end='')
