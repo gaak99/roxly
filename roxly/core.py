@@ -914,23 +914,11 @@ class Roxly():
                 print('\t\t then run: roxly push --add %s' % (filepath))
             sys.exit(rt)
             
-    def rox_merge3(self, dry_run, merge_cmd, reva, revb, filepath):
-        """Run cmd for 3-way merge (aka auto-merge when possible)
-        """
-        reva = self._head2rev(filepath, reva)
-        revb = self._head2rev(filepath, revb)
-
-        self._pull_me_maybe(reva, filepath)
-        self._pull_me_maybe(revb, filepath)
-        (fa, fb) = self._get_diff_pair(reva, revb, filepath)
-        #ancdb = self._open_ancdb()
-        #hash = ancdb.get(filepath)
-        hash = self.mmdb.get('ancestor_rev') ##gbrox _hash
-        self._debug('debug merge3: ancestor_rev (hash)=%s' % hash)
+    def _rox_merge3_check_anchash(self, hash, anc_rev, reva, revb):
         if hash == None:
             print('Warning hash==None: cant do a 3-way merge as ancestor revision not found.')
             sys.exit('Warning: you can still do a 2-way merge (roxly merge2 --help).')
-        anc_rev = self._hash2rev(filepath, hash)
+            
         if anc_rev == None: #not enough revs downloaded 
             print('Warning ancrev==None: cant do a 3-way merge as no ancestor revision found.')
             sys.exit('Warning: you can still do a 2-way merge (roxly merge2 --help).')
@@ -940,23 +928,13 @@ class Roxly():
             print('Warning: reva %s == anc_rev %s' % (reva, anc_rev))
             print('Warning: does not look like a merge is necessary. Try Sync on Orgzly.')
             sys.exit('Warning: you can still do a 2-way merge if necessary (roxly merge2 --help).')
+            
         if revb == anc_rev:
             print('Warning: revb %s == anc_rev %s' % (revb, anc_rev))
             print('Warning: does not look like a merge is necessary, try Sync on Orgzly.')
             sys.exit('Warning: you can still do a 2-way merge if necessary (roxly merge2 --help).')
-            sys.exit(1)
-        f_anc = self._get_pname_wdrev_ln(filepath, anc_rev, suffix=':ANCESTOR')
-        mcmd = margs = None
-        if merge_cmd:
-            mc = merge_cmd.split(' ')
-            mcmd = mc[0]
-            margs = mc[1:] if len(mc)>1 else []
-        mcmd = [mcmd] if mcmd else [DIFF3_BIN]
-        margs = margs if margs else [DIFF3_BIN_ARGS]
-        cmd3 = mcmd + margs + [fa, f_anc, fb]
-        self._debug('debug merge3: cmd3=%s' % cmd3)
-        if dry_run:
-            print('merge3 dry-run: %s' % cmd3)
+
+    def  _rox_merge3_run_cmd(self, dry_run, filepath, cmd3):
         tmpf = '/tmp/tmproxlymerge3.' + str(os.getpid())
         fname = '/dev/null' if dry_run else tmpf
         with open(fname, 'w') as fout:
@@ -980,6 +958,42 @@ class Roxly():
                 print('\t\t then run: mv %s %s' % (fcon, filepath))
                 print('\t\t then run: roxly push --add %s' % (filepath))
             sys.exit(rt)
+
+    def _rox_merge3_cmd_factory(self, fa, fb, f_anc, merge_cmd):
+        mcmd = margs = None
+        if merge_cmd:
+            mc = merge_cmd.split(' ')
+            mcmd = mc[0]
+            margs = mc[1:] if len(mc)>1 else []
+        mcmd = [mcmd] if mcmd else [DIFF3_BIN]
+        margs = margs if margs else [DIFF3_BIN_ARGS]
+        return mcmd + margs + [fa, f_anc, fb]
+        
+    ##gbrox sep class?
+    def rox_merge3(self, dry_run, merge_cmd, reva, revb, filepath):
+        """Run cmd for 3-way merge (aka auto-merge when possible)
+        """
+        reva = self._head2rev(filepath, reva)
+        revb = self._head2rev(filepath, revb)
+
+        self._pull_me_maybe(reva, filepath)
+        self._pull_me_maybe(revb, filepath)
+        (fa, fb) = self._get_diff_pair(reva, revb, filepath)
+
+        hash = self.mmdb.get('ancestor_rev') ##gbrox _hash
+        anc_rev = self._hash2rev(filepath, hash)
+        self._debug('debug merge3: ancestor (hash)=%s, ancestor_rev=%s'
+                    % (hash[:8], anc_rev))
+
+        self._rox_merge3_check_anchash(hash, anc_rev, reva, revb)
+        
+        f_anc = self._get_pname_wdrev_ln(filepath, anc_rev, suffix=':ANCESTOR')
+        cmd = self._rox_merge3_cmd_factory(fa, fb, f_anc, merge_cmd)
+        
+        if dry_run:
+            print('merge3 dry-run: %s' % cmd)
+
+        self._rox_merge3_run_cmd(dry_run, filepath, cmd)
 
     def merge3_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
         """Run mergerc_cmd to allow user to merge 3 revs.
