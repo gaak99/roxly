@@ -8,6 +8,7 @@ setup(
     include_package_data=True,
     python_requires=">=3.5",
     install_requires=[
+        'attrs',
         'Click',
         #'dropbox>=7.2.1',
         'dropbox>=9.1.0',
