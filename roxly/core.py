@@ -43,6 +43,7 @@ from dropbox.file_properties import PropertyFieldTemplate, PropertyType, Propert
 from .utils import make_sure_path_exists, get_relpaths_recurse, utc_to_localtz
 from .utils import calc_dropbox_content_hash
 
+from .log import Log
 from .merge3 import Merge3
 
 USER_AGENT = 'roxly/' + __version__
@@ -1141,7 +1142,10 @@ class Roxly():
                 print('Content hash:  %s' % content_hash)
                 nout += 1
 
- 
+    def rox_log(self, oneline, recent, filepath):
+        l = Log(self.repo, filepath, self.debug)
+        l.log(oneline, recent)
+        
     def log(self, oneline, recent, filepath):
         """List all local revisions (subset of) meta data""" 
         self._debug('debug: start log: %s' % filepath)

@@ -3,6 +3,7 @@ import attr
 
 from .pathname import PathName
 from .misc import Misc
+from .utils import utc_to_localtz
 
 ROXLYSEP1 = '::'
 #ROXLYSEP2 = ':::'
@@ -23,7 +24,7 @@ class Log(object):
         if self.debug:
             print(s)  # xxx stderr?
 
-    def get(self):
+    def get(self, filepath):
         fp = self.filepath
         pn = PathName(self.repo, fp, self.debug)
         self._debug('debug _get_log start %s' % fp)
@@ -46,11 +47,11 @@ class Log(object):
         r = rev.lower()
         if r == 'head':
             #logs = self._get_log(fp)
-            logs = self.get()
+            logs = self.get(fp)
             h = logs[0]
             (rev, date, size, content_hash) = h.split(ROXLYSEP1)
         elif r == 'headminus1':
-            logs = self.get()
+            logs = self.get(fp)
             if len(logs) == 1:
                 sys.exit('warning: only one rev so far so no headminus1')
             h = logs[1]
@@ -73,7 +74,7 @@ class Log(object):
             if l > 1:
                 print()
 
-    def _one_path(self, oneline, recent):
+    def _one_path(self, oneline, recent, filepath):
         # on disk '$fileROXLYSEP2log':
         #   $rev $date $size $hash
         fp = self.filepath

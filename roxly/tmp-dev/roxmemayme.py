@@ -34,7 +34,8 @@ if __name__ == '__main__':
     ## log
     oneline=True
     recent=5
-    roxme.log(oneline, recent, filepath)
+    #roxme.log(oneline, recent, filepath)
+    roxme.rox_log(oneline, recent, filepath)
 
     ## cat
     cat_cmd=None
