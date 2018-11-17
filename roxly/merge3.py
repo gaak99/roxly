@@ -4,6 +4,10 @@ import os
 import sys
 import subprocess as sp
 
+from .log import Log
+from .misc import Misc
+from .pathname import PathName
+
 DIFF3_BIN = 'diff3'
 DIFF3_BIN_ARGS = '-m'
 
@@ -11,36 +15,51 @@ DIFF3_BIN_ARGS = '-m'
 class Merge3(object):
     """Run Unix command for 3-way merge (aka auto-merge when possible)
     """
+    repo = attr.ib()
     dry_run = attr.ib()
     merge_cmd = attr.ib()
     reva = attr.ib()
     revb = attr.ib()
     filepath = attr.ib()
+    mmdb = attr.ib()
+    debug = attr.ib()
     roxly = attr.ib()
     #print('Merge3 init??? this thing on? roxly=%s' % type(roxly))
+    #pn = PathName(self.repo, filepath, debug)
+    #log = Log(repo, filepath, debug)
 
+    def _debug(self, s):
+        if self.debug:
+            print(s)  # xxx stderr?
+    
     def merge(self):
         #print('Merge3 merge roxly=%s' % type(self.roxly))
         fp  = self.filepath
         reva = self.reva
         revb = self.revb
-        rox = self.roxly
+        rox = self.roxly#tmp
+        dbg = self.debug
         
-        reva = rox._head2rev(fp, reva)
-        revb = rox._head2rev(fp, revb)
+        pn = PathName(self.repo, fp, dbg)
+        log = Log(self.repo, fp, dbg)
+        m = Misc(self.repo, fp, dbg)
+        
+        reva = log.head2rev(reva)
+        revb = log.head2rev(revb)
 
         rox._pull_me_maybe(reva, fp)
         rox._pull_me_maybe(revb, fp)
         (fa, fb) = rox._get_diff_pair(reva, revb, fp)
 
-        hash = rox.mmdb.get('ancestor_rev') ##gbrox _hash
-        anc_rev = rox._hash2rev(fp, hash)
-        rox._debug('debug merge3: ancestor (hash)=%s, ancestor_rev=%s'
+        hash = self.mmdb.get('ancestor_rev') ##gbrox _hash
+        anc_rev = m.hash2rev(hash)
+        anc_rev = m.hash2rev(hash)
+        self._debug('debug merge3: ancestor (hash)=%s, ancestor_rev=%s'
                     % (hash[:8], anc_rev))
 
         self._check_anchash(hash, anc_rev)
         
-        f_anc = rox._get_pname_wdrev_ln(fp, anc_rev, suffix=':ANCESTOR')
+        f_anc = pn.wdrev_ln(anc_rev, suffix=':ANCESTOR')
         cmd = self._cmd_factory(fa, fb, f_anc)
         
         if self.dry_run:
