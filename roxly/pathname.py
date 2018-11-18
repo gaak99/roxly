@@ -10,6 +10,7 @@ HASHREVDB = 'hashrevdb.json'
 LOGFILENAME = 'log.txt'
 ROXLYHOME = '.roxly'
 ROXLYSEP1 = '::'
+ROXLYINDEX = 'index'
 
 @attr.s
 class PathName(object):
@@ -46,6 +47,13 @@ class PathName(object):
         #return self.repo + '/' + self.home
         return self.repo + '/' + ROXLYHOME
 
+    def home_paths(self):
+        path = self.home_base_tmp() + '/roxly' + ROXLYSEP1 + 'filepaths'
+        return os.path.expanduser(path)
+    
+    def home_base_tmp(self):
+        return self._get_pname_home_base() + '/.tmp'
+    
     def home_revsdir(self):
         fp = self.filepath
         base_path = self.home_base()
@@ -57,6 +65,13 @@ class PathName(object):
     def hrdbpath(self):
         # one per file
         return self.home_revsdir() + '/' + HASHREVDB
+
+    def index(self):
+        return self._get_pname_home_base_tmp() + '/' + 'roxly'\
+            + ROXLYSEP1 + ROXLYINDEX
+
+    def index_path(self, path):
+        return self._get_pname_index() + '/' + path
 
     def logpath(self):
         # one per file
