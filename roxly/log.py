@@ -1,9 +1,13 @@
 
+import pickledb
+import os
+import sys
+
 import attr
 
-from .pathname import PathName
 from .misc import Misc
-from .utils import utc_to_localtz
+from .pathname import PathName
+from .utils import make_sure_path_exists, utc_to_localtz
 
 ROXLYSEP1 = '::'
 #ROXLYSEP2 = ':::'
@@ -102,3 +106,26 @@ class Log(object):
                 print('Content hash:  %s' % content_hash)
                 nout += 1
 
+
+    def revs_md(self, md_l, log_path, hrdb_path):
+        self._debug('_log_revs_md %s %s' % (len(md_l), log_path))
+        
+        if os.path.isfile(log_path):
+            os.remove(log_path)
+            
+        make_sure_path_exists(os.path.dirname(log_path))
+        
+        hrdb = pickledb.load(hrdb_path, 'False')
+        
+        #gbpy3 with open(os.path.expanduser(log_path), "wb") as logf:
+        with open(os.path.expanduser(log_path), "w") as logf:
+            for md in md_l:
+                logf.write('%s%s%s%s%s%s%s\n' % (md.rev, ROXLYSEP1,
+                                             md.server_modified,
+                                             ROXLYSEP1, md.size,
+                                             ROXLYSEP1, md.content_hash,))
+                #xxx check if key already exists??
+                hrdb.set(md.content_hash, md.rev)
+
+        hrdb.dump()
+                

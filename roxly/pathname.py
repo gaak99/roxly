@@ -1,10 +1,11 @@
 
-import attr
 import os
 #import sys
 
+import attr
+
 from .utils import make_sure_path_exists
-#from .log import Log
+#nonono from .log import Log
 
 HASHREVDB = 'hashrevdb.json'
 LOGFILENAME = 'log.txt'
@@ -52,7 +53,7 @@ class PathName(object):
         return os.path.expanduser(path)
     
     def home_base_tmp(self):
-        return self._get_pname_home_base() + '/.tmp'
+        return self.home_base() + '/.tmp'
     
     def home_revsdir(self):
         fp = self.filepath
@@ -67,11 +68,11 @@ class PathName(object):
         return self.home_revsdir() + '/' + HASHREVDB
 
     def index(self):
-        return self._get_pname_home_base_tmp() + '/' + 'roxly'\
+        return self.home_base_tmp() + '/' + 'roxly'\
             + ROXLYSEP1 + ROXLYINDEX
 
     def index_path(self, path):
-        return self._get_pname_index() + '/' + path
+        return self.index() + '/' + path
 
     def logpath(self):
         # one per file
@@ -104,17 +105,18 @@ class PathName(object):
         return dest
 
     def wt_path(self):
+        self._debug('wt_path: repo=%s, fp=%s' % (self.repo, self.filepath))
         return self.repo_base() + '/' + self.filepath
 
     ## /sad dups of Log meths to prevent circjerk
     def _log_get(self):
-        fp = self.filepath
-        self._debug('debug _get_log start %s' % path)
+        self._debug('debug _get_log start %s' % self.filepath)
+        
         # on disk '$fileROXLYSEP2log':
         #   $rev||$date||$size
-        #log_path = self._get_pname_logpath(fp)
-        log_path = self.logpath(fp) #home_revsdir, home_base
+        log_path = self.logpath() #home_revsdir, home_base
         self._debug('debug _get_log `%s`' % log_path)
+        
         try:
             with open(log_path) as f:
                 content = f.readlines()
@@ -129,7 +131,7 @@ class PathName(object):
         r = rev.lower()
         if r == 'head':
             #logs = self._get_log(fp)
-            logs = self._log_get(fp)
+            logs = self._log_get()
             h = logs[0]
             (rev, date, size, content_hash) = h.split(ROXLYSEP1)
         elif r == 'headminus1':

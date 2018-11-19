@@ -1,27 +1,35 @@
 
-import attr
 import os
 import pickledb
 import sys
 
+import attr
+
 from . import __version__
+from .dbxops import DbxOps
 from .log import Log
 from .misc import Misc
 from .pathname import PathName
+from .utils import make_sure_path_exists
 
 ROXLYDIRVERSION = "1"
 ROXLYSEP1 = '::'
 ROXLYSEP2 = ':::'
 ROXLYHOME = '.roxly'
 ROXLYMETAMETA = 'metametadb.json'
+ROXLY_PROP_TEMPLATE_ID = 'ptid:uDbBKfpJCRUAAAAAAAADww'
+
+# 100 appears to be free Dropbox svc max, non-free max?
+NREVS_MAX = 100
 
 @attr.s
 class Clone(object):
     """clone me maybe
     """
-    src_url = attr.ib()
     dry_run = attr.ib()
+    src_url = attr.ib()
     nrevs  = attr.ib()
+    repo = attr.ib()
     debug = attr.ib()
     
     def _debug(self, s):
@@ -29,7 +37,8 @@ class Clone(object):
             print('Clone: %s' % s)  # xxx stderr?
 
     def _check_fp_exists(self, filepath):
-        repo_home = self._get_pname_home_base() + filepath
+        pn = PathName(self.repo, filepath, self.debug)
+        repo_home = pn.home_base() + filepath
         repo_home_dir = os.path.dirname(os.path.expanduser(repo_home))
         make_sure_path_exists(repo_home_dir)
 
@@ -43,7 +52,7 @@ class Clone(object):
         print('clone dry-run: local repo = %s' % self.repo)
         sys.exit(0)
         
-    def _get_filepath(self, src):
+    def _get_filepath(self, src_url):
         # src_url should-not-must be a dropbox url for chrimony sakes
         filepath = src_url.lower()  # XXX dbx case insensitive
         if filepath.startswith('dropbox://'):
@@ -59,7 +68,7 @@ class Clone(object):
         self._debug('debug clone: download %d revs of %s to %s' % (nrevs,
                                                                    filepath,
                                                                    self.repo))
-        dbx = Dbxops(self.repo)
+        dbx = DbxOps(self.repo, filepath, self.debug)
         log = Log(self.repo, filepath, self.debug)
         pn = PathName(self.repo, filepath, self.debug)
         
@@ -69,7 +78,7 @@ class Clone(object):
         md_l = dbx.get_revs_md(filepath, nrevs)
         print(' done.')
         
-        log.revs_md(md_l, pn.logpath(filepath), pn.hrdbpath(filepath))
+        log.revs_md(md_l, pn.logpath(), pn.hrdbpath())
         
         print('Checking 2 latest revisions in Dropbox...')
         
@@ -84,12 +93,15 @@ class Clone(object):
 
         if staged version exists revert wd one to it instead.
         """
-        m = Misc(None, filepath, self.debug)
+        self._debug('checkout: %s' % filepath)
+            
+        m = Misc(self.repo, filepath, self.debug)
         pn = PathName(self.repo, filepath, self.debug)
         
         if filepath:
-            if not os.path.isfile(pn.by_rev(filepath)):
-                sys.exit('error: filepath name not found in repo home -- spelled correctly?')
+            fp = pn.by_rev() #default==head
+            if not os.path.isfile(fp):
+                sys.exit('ERROR: filepath name not found in repo home -- `%s` spelled correctly?' % fp)
             fp_l = [filepath]
         else:
             fp_l = m.repohome_files_get()
@@ -116,7 +128,7 @@ class Clone(object):
                     make_sure_path_exists(
                         os.path.dirname(pn.wt_path(p)))
                     os.system('cp %s %s' % (p_head,
-                                            self._get_pname_wt_path(p)))
+                                            pn.wt_path(p)))
                     
     def clone(self):
         """Given a dropbox url for one file*, fetch the
@@ -127,9 +139,9 @@ class Clone(object):
         src_url = self.src_url
         dry_run = self.dry_run
         nrevs = int(self.nrevs)
-        self._debug('debug clone: nrevs=%d' % (nrevs))
-
-        m = Misc(None, None, self.debug)
+        repo = self.repo
+        
+        m = Misc(repo, None, self.debug)
 
         if nrevs > NREVS_MAX:
             print('Warning: max number of revisions for free service is %s' % NREVS_MAX)
@@ -145,8 +157,8 @@ class Clone(object):
 
         self._check_fp_exists(filepath)
 
-        ##gbrox s/ancrev/anchash ??
-        ancrev = self._rox_ancrev_get(filepath, ROXLY_PROP_TEMPLATE_ID)
+        dbx = DbxOps(self.repo, filepath, self.debug)
+        ancrev = m.ancrev_get(filepath, ROXLY_PROP_TEMPLATE_ID) #gbrox anc hash !rev
         self._debug('debug clone: downloaded ancestor hash=%s' % ancrev[:8])
 
         m.mmdb_populate(src_url, nrevs, ancrev)
@@ -159,10 +171,10 @@ class Clone(object):
 
     def init(self):
         """Initialize local repo .roxly dir"""
-        pn = PathName(self.repo, fp, self.debug)
-        m = Misc(None, None, self.debug)
+        pn = PathName(self.repo, None, self.debug)
+        m = Misc(self.repo, None, self.debug)
 
-        base_path = self.home_base()
+        base_path = pn.home_base()
         if os.path.isdir(base_path) or os.path.isfile(base_path):
             m.save_repo()
 
@@ -184,11 +196,11 @@ class Clone(object):
     def pull(self, rev, filepath):
         self._debug('pull: %s, %s' % (rev, filepath))
 
-        dbx = Dbxops(self.repo)
+        dbx = DbxOps(self.repo, filepath, self.debug)
         pn = PathName(self.repo, filepath, self.debug)
         
         fp = self._wd_or_index(rev, filepath)
-        fp = fp if fp else pn.by_rev(filepath, rev)
+        fp = fp if fp else pn.by_rev(rev)
         self._debug('pull: fp %s' % (fp))
         if not os.path.isfile(fp):
             filepath = filepath if filepath[0] == '/' else '/' + filepath 
@@ -203,7 +215,7 @@ class Clone(object):
     def _pull_me_maybe(self, rev, filepath):
         pn = PathName(self.repo, filepath, self.debug)
         fp = self._wd_or_index(rev, filepath)
-        fp = fp if fp else pn.by_rev(filepath, rev)
+        fp = fp if fp else pn.by_rev(rev)
         if not os.path.isfile(fp):
             sys.exit('Warning: rev data is not local. Pls run: roxly pull --rev %s %s'
                      % (rev, filepath))

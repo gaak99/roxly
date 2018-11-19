@@ -44,6 +44,8 @@ from .utils import make_sure_path_exists, get_relpaths_recurse, utc_to_localtz
 from .utils import calc_dropbox_content_hash
 
 from .log import Log
+
+from .clone import Clone
 from .merge3 import Merge3
 
 USER_AGENT = 'roxly/' + __version__
@@ -529,6 +531,10 @@ class Roxly():
 
         return pg[0].fields[0].value
     
+    def rox2_clone(self, dry_run, src_url, nrevs):
+        cln = Clone(dry_run, src_url, nrevs, self.repo, self.debug)
+        cln.clone()
+        
     def rox_clone(self, dry_run, src_url, nrevs):
         """Given a dropbox url for one file*, fetch the
         n revisions of the file and store locally in repo's
