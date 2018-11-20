@@ -47,6 +47,7 @@ from .log import Log
 
 from .cat import Cat
 from .clone import Clone
+from .diff import Diff
 from .merge3 import Merge3
 
 USER_AGENT = 'roxly/' + __version__
@@ -733,6 +734,10 @@ class Roxly():
         self._debug('debug _diff2_one_path: %s' % shcmd)
         os.system(shcmd)
 
+    def rox_diff(self, diff_cmd, reva, revb, filepath):
+        d = Diff(self.repo, diff_cmd, filepath, self.debug)
+        d.diff(reva, revb)
+        
     def diff(self, diff_cmd, reva, revb, filepath):
         """Run diff_cmd to display diffs from two revisions of file.
 

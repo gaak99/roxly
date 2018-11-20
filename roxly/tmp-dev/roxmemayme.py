@@ -40,8 +40,8 @@ if __name__ == '__main__':
     roxme.rox_log(oneline, recent, filepath)
 
     cat_cmd=DEFAULT_CAT_CMD
-    rev='60f90446decd'
-    roxme.rox_cat(cat_cmd, rev, filepath)
+    reva='60f90446decd'
+    roxme.rox_cat(cat_cmd, reva, filepath)
 
     ## cat
     cat_cmd=None
@@ -53,6 +53,7 @@ if __name__ == '__main__':
     reva='HEADMINUS1'
     revb='HEAD'
     #roxme.diff(diff_cmd, reva, revb, filepath)
+    roxme.rox_diff(diff_cmd, reva, revb, filepath)
 
     ## merge2
     dry_run=False

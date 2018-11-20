@@ -133,15 +133,13 @@ class PathName(object):
 
     ## /sad dups of Log to prevent circjerk
     def _log_head2rev(self, filepath, rev):
-        fp = filepath
         r = rev.lower()
         if r == 'head':
-            #logs = self._get_log(fp)
             logs = self._log_get()
             h = logs[0]
             (rev, date, size, content_hash) = h.split(ROXLYSEP1)
         elif r == 'headminus1':
-            logs = self._log_get(fp)
+            logs = self._log_get()
             if len(logs) == 1:
                 sys.exit('warning: only one rev so far so no headminus1')
             h = logs[1]
