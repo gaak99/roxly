@@ -1,4 +1,5 @@
 
+from itertools import filterfalse
 import pickledb
 import os
 
@@ -137,6 +138,19 @@ class Misc(object):
             return '<null>'
         
         return pg[0].fields[0].value
+
+    def scrub_fnames(self, fp_l):
+        #gbpy3 ifp_l = itertools.ifilterfalse(lambda x: x.startswith('.roxly'), fp_l)
+        ifp_l = filterfalse(lambda x: x.startswith('.roxly'), fp_l)
+        if not ifp_l:
+            return None
+        
+        # emacs prev version
+        ifp_l = filterfalse(lambda x: x.endswith('~'), ifp_l)
+        if not ifp_l:
+            return None
+        
+        return ifp_l
 
     def save_repo(self):
         # Save current .roxly/.tmp (includes index dir, maybe for recovery?).

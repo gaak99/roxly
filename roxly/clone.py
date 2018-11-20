@@ -199,32 +199,23 @@ class Clone(object):
         dbx = DbxOps(self.repo, filepath, self.debug)
         pn = PathName(self.repo, filepath, self.debug)
         
-        fp = self._wd_or_index(rev, filepath)
+        fp = pn.wd_or_index(rev)
         fp = fp if fp else pn.by_rev(rev)
         self._debug('pull: fp %s' % (fp))
         if not os.path.isfile(fp):
-            filepath = filepath if filepath[0] == '/' else '/' + filepath 
+            filepath = filepath if filepath[0] == '/' else '/'+filepath
+            
             print('\tdownloading rev %s data ...' % rev, end='')
+            
             if self.debug:
                 print()
-            dbx.download_data_one_rev(rev, filepath)
+
+            try:    
+                dbx.download_data_one_rev(rev, filepath)
+            except Exception as err:
+                print('Call to Dropbox to download file data failed: %s' % err)
+                sys.exit(1)
+
             print(' done.')
         else:
             print('\trevision %s already downloaded.' % rev)
-
-    def _pull_me_maybe(self, rev, filepath):
-        pn = PathName(self.repo, filepath, self.debug)
-        fp = self._wd_or_index(rev, filepath)
-        fp = fp if fp else pn.by_rev(rev)
-        if not os.path.isfile(fp):
-            sys.exit('Warning: rev data is not local. Pls run: roxly pull --rev %s %s'
-                     % (rev, filepath))
-
-    def _wd_or_index(self, rev, p):
-        pn = PathName(self.repo, p, self.debug)
-        if rev == 'wd':
-            return pn.wt_path(p)
-        if rev == 'index':
-            return pn.index_path(p)
-        
-        return None

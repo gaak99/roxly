@@ -4,7 +4,7 @@ import os
 
 import attr
 
-from .utils import make_sure_path_exists
+from .utils import get_relpaths_recurse, make_sure_path_exists
 #nonono from .log import Log
 
 HASHREVDB = 'hashrevdb.json'
@@ -25,12 +25,13 @@ class PathName(object):
             print(s)  # xxx stderr?
     
     def by_rev(self, rev='head'):
-        fp = self.filepath
-        if rev == 'head' or rev == 'headminus1':
-            #rev = self._head2rev(path, rev)
-            rev = self._log_head2rev(rev)
-
         self._debug('by_rev: rev=%s' % rev)
+
+        fp = self.filepath
+        
+        if rev == 'head' or rev == 'headminus1':
+            rev = self._log_head2rev(fp, rev)
+
         pn_revdir = self.home_revsdir()
         make_sure_path_exists(pn_revdir)
 
@@ -38,8 +39,8 @@ class PathName(object):
 
     def by_wdrev(self, rev):
         fp = self.filepath
+        
         if rev == 'head' or rev == 'headminus1':
-            #rev = self._head2rev(path, rev)
             rev = self._log_head2rev(fp, rev)
 
         return self.wt_path() + ROXLYSEP1 + rev
@@ -108,6 +109,11 @@ class PathName(object):
         self._debug('wt_path: repo=%s, fp=%s' % (self.repo, self.filepath))
         return self.repo_base() + '/' + self.filepath
 
+    def wt_paths(self):
+        wt_dir = self.repo_base()
+        self._debug('debug: wt_paths: %s' % wt_dir)
+        return get_relpaths_recurse(wt_dir)
+    
     ## /sad dups of Log meths to prevent circjerk
     def _log_get(self):
         self._debug('debug _get_log start %s' % self.filepath)
@@ -126,8 +132,8 @@ class PathName(object):
         return content
 
     ## /sad dups of Log to prevent circjerk
-    def _log_head2rev(self, rev):
-        fp = self.filepath
+    def _log_head2rev(self, filepath, rev):
+        fp = filepath
         r = rev.lower()
         if r == 'head':
             #logs = self._get_log(fp)
@@ -142,3 +148,21 @@ class PathName(object):
             (rev, date, size, content_hash) = h.split(ROXLYSEP1)
 
         return rev
+
+    def wd_or_index(self, rev):
+        fp = self.filepath
+        
+        if rev == 'wd':
+            return self.wt_path(fp)
+        if rev == 'index':
+            return self.index_path(fp)
+        
+        return None    
+
+    def pull_me_maybe(self, rev):
+        fp = self.wd_or_index(rev)
+        fp = fp if fp else self.by_rev(rev)
+        if not os.path.isfile(fp):
+            sys.exit('Warning: rev data is not local. Pls run: roxly pull --rev %s %s'
+                     % (rev, self.filepath))
+    

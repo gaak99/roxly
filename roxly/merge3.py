@@ -47,10 +47,9 @@ class Merge3(object):
         reva = log.head2rev(reva)
         revb = log.head2rev(revb)
 
-        rox._pull_me_maybe(reva, fp)
-        rox._pull_me_maybe(revb, fp)
-        (fa, fb) = rox._get_diff_pair(reva, revb, fp)
-
+        pn.pull_me_maybe(reva)
+        pn.pull_me_maybe(revb)
+        
         hash = self.mmdb.get('ancestor_rev') ##gbrox _hash
         anc_rev = m.hash2rev(hash)
         anc_rev = m.hash2rev(hash)
@@ -59,6 +58,7 @@ class Merge3(object):
 
         self._check_anchash(hash, anc_rev)
         
+        (fa, fb) = rox._get_diff_pair(reva, revb, fp)
         f_anc = pn.wdrev_ln(anc_rev, suffix=':ANCESTOR')
         cmd = self._cmd_factory(fa, fb, f_anc)
         

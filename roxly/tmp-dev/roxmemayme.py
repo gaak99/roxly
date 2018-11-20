@@ -5,6 +5,7 @@
 from roxly.core import Roxly, NREVS_MAX
 
 #from . import __version__
+DEFAULT_CAT_CMD = 'cat %s'
 
 if __name__ == '__main__':
     #print('roxmemayme: start')
@@ -21,7 +22,7 @@ if __name__ == '__main__':
     #src='dropbox://testdir2/roxly-test0.org'
     #roxme.clone(dry_run, src, nrevs, init_ancdb)
     src='dropbox://testdir3/roxme1.txt'
-    roxme.rox2_clone(dry_run, src, nrevs)
+    #roxme.rox2_clone(dry_run, src, nrevs)
 
     ## status
     #filepath='testdir2/roxly-test0.org'
@@ -37,6 +38,10 @@ if __name__ == '__main__':
     recent=5
     #roxme.log(oneline, recent, filepath)
     roxme.rox_log(oneline, recent, filepath)
+
+    cat_cmd=DEFAULT_CAT_CMD
+    rev='60f90446decd'
+    roxme.rox_cat(cat_cmd, rev, filepath)
 
     ## cat
     cat_cmd=None

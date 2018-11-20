@@ -45,6 +45,7 @@ from .utils import calc_dropbox_content_hash
 
 from .log import Log
 
+from .cat import Cat
 from .clone import Clone
 from .merge3 import Merge3
 
@@ -790,6 +791,10 @@ class Roxly():
         self._debug('debug _cat_one_path: %s' % shcmd)
         os.system(shcmd)
             
+    def rox_cat(self, cat_cmd, rev, filepath):
+        c = Cat(self.repo, cat_cmd, filepath, self.debug)
+        c.cat(rev)
+        
     def cat(self, cat_cmd, rev, filepath):
         """Run cat_cmd to display cats from a revision of file.
 
