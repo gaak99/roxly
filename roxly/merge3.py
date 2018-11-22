@@ -4,9 +4,17 @@ import os
 import sys
 import subprocess as sp
 
+from .diff import Diff
 from .log import Log
 from .misc import Misc
 from .pathname import PathName
+
+# defaults 2-way diff/merge
+MERGE_BIN = "emacsclient"
+MERGE_EVAL = "--eval"
+MERGE_EVALFUNC = "ediff-merge-files"
+DEFAULT_MERGE_CMD = MERGE_BIN + ' ' + MERGE_EVAL + ' \'('\
+                    + MERGE_EVALFUNC + ' %s %s' + ')\''
 
 DIFF3_BIN = 'diff3'
 DIFF3_BIN_ARGS = '-m'
@@ -21,7 +29,7 @@ class Merge3(object):
     reva = attr.ib()
     revb = attr.ib()
     filepath = attr.ib()
-    mmdb = attr.ib()
+    #mmdb = attr.ib()
     debug = attr.ib()
     roxly = attr.ib()
     #print('Merge3 init??? this thing on? roxly=%s' % type(roxly))
@@ -127,3 +135,38 @@ class Merge3(object):
         mcmd = [mcmd] if mcmd else [DIFF3_BIN]
         margs = margs if margs else [DIFF3_BIN_ARGS]
         return mcmd + margs + [fa, f_anc, fb]
+
+    def merge2(self, emacsclient_path):
+        """Run merge_cmd to allow user to merge two revs.
+
+        merge_cmd format:  program %s %s
+        """
+        fp  = self.filepath
+        reva = self.reva
+        revb = self.revb
+        dbg = self.debug
+
+        df = Diff(self.repo, None, fp, dbg)
+        pn = PathName(self.repo, fp, dbg)
+        
+        pn.pull_me_maybe(reva.lower())
+        pn.pull_me_maybe(revb.lower())
+        
+        qs = lambda s: '\"' + s + '\"'
+        
+        (fa, fb) = df.get_diff_pair(reva.lower(), revb.lower())
+        
+        if self.merge_cmd:
+            shcmd = merge_cmd % (qs(fa), qs(fb))  # quotes cant hurt, eh?
+        elif emacsclient_path:
+            m_cmd = emacsclient_path + '/' + DEFAULT_MERGE_CMD
+            shcmd = m_cmd % (qs(fa), qs(fb))
+        else:
+            shcmd = DEFAULT_MERGE_CMD % (qs(fa), qs(fb))
+        self._debug('debug merge2: %s' % shcmd)
+
+        if self.dry_run:
+            print('merge2 dry-run: %s' % shcmd)
+            return
+        
+        os.system(shcmd)

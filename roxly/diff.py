@@ -20,14 +20,14 @@ class Diff(object):
         if self.debug:
             print(s)  # xxx stderr?
 
-    def _get_diff_pair(self, reva, revb):
+    def get_diff_pair(self, reva, revb):
         pn = PathName(self.repo, self.filepath, self.debug)
         
         ap = pn.wd_or_index(reva)
         bp = pn.wd_or_index(revb)
         
         ap = ap if ap else pn.wdrev_ln(reva)
-        self._debug("_get_diff_pair: ap=%s" % ap)
+        self._debug("get_diff_pair: ap=%s" % ap)
         bp = bp if bp else pn.wdrev_ln(revb)
         
         return ap, bp
@@ -41,7 +41,7 @@ class Diff(object):
         diff_cmd = self.diff_cmd if self.diff_cmd else DEFAULT_DIFF_CMD
         self._debug('debug _diff2_one_path: %s' % diff_cmd)
         
-        shcmd = diff_cmd % self._get_diff_pair(reva.lower(), revb.lower())
+        shcmd = diff_cmd % self.get_diff_pair(reva.lower(), revb.lower())
         self._debug('debug _diff2_one_path: %s' % shcmd)
         os.system(shcmd)
 

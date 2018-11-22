@@ -1076,6 +1076,10 @@ class Roxly():
         """
         self.merge3_rc(dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath)
 
+    def rox_merge2(self, dry_run, emacsclient_path, merge_cmd, reva, revb, filepath):
+        m = Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath,  self.debug, self)
+        m.merge2(emacsclient_path)
+        
     def merge2(self, dry_run, emacsclient_path, merge_cmd, reva, revb, filepath):
         """Run merge_cmd to allow user to merge two revs.
 
