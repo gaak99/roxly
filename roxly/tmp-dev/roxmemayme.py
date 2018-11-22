@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     ## metameta
     key='ancestor_rev'
-    roxme.getmm(key)
+    #roxme.getmm(key)
     
     ## log
     oneline=True
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     cat_cmd=DEFAULT_CAT_CMD
     reva='60f90446decd'
-    roxme.rox_cat(cat_cmd, reva, filepath)
+    #roxme.rox_cat(cat_cmd, reva, filepath)
 
     ## cat
     cat_cmd=None
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     reva='HEADMINUS1'
     revb='HEAD'
     #roxme.diff(diff_cmd, reva, revb, filepath)
-    roxme.rox_diff(diff_cmd, reva, revb, filepath)
+    #roxme.rox_diff(diff_cmd, reva, revb, filepath)
 
     ## merge2
     dry_run=False
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     #roxme.merge(dry_run, merge_cmd, reva, revb, filepath)
 
     ## merge3
-    dry_run=True
+    dry_run=False
     #emacsclient_path=None
     merge_cmd=None
     #roxme.rox_merge3(dry_run, merge_cmd, reva, revb, filepath)
@@ -71,8 +71,9 @@ if __name__ == '__main__':
     
     ## push
     #dry_run=True
-    dry_run=False
+    dry_run=True
     add=True
-    post_push_clone=False
+    post_push_clone=True
     #roxme.push(dry_run, add, post_push_clone, filepath)
     #roxme.rox_push(dry_run, add, post_push_clone, filepath)
+    roxme.rox2_push(dry_run, add, post_push_clone, filepath)

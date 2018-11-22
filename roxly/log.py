@@ -28,7 +28,7 @@ class Log(object):
         if self.debug:
             print(s)  # xxx stderr?
 
-    def get(self, filepath):
+    def get(self):
         fp = self.filepath
         pn = PathName(self.repo, fp, self.debug)
         self._debug('debug _get_log start %s' % fp)
@@ -51,11 +51,11 @@ class Log(object):
         r = rev.lower()
         if r == 'head':
             #logs = self._get_log(fp)
-            logs = self.get(fp)
+            logs = self.get()
             h = logs[0]
             (rev, date, size, content_hash) = h.split(ROXLYSEP1)
         elif r == 'headminus1':
-            logs = self.get(fp)
+            logs = self.get()
             if len(logs) == 1:
                 sys.exit('warning: only one rev so far so no headminus1')
             h = logs[1]
@@ -83,7 +83,7 @@ class Log(object):
         #   $rev $date $size $hash
         fp = self.filepath
         nout = 0
-        logs = self.get(fp)
+        logs = self.get()
         if oneline:
             for l in logs:
                 if nout >= recent:

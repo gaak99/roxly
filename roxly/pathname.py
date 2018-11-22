@@ -164,3 +164,13 @@ class PathName(object):
             sys.exit('Warning: rev data is not local. Pls run: roxly pull --rev %s %s'
                      % (rev, self.filepath))
     
+    def index_paths(self):
+        index_dir = self.index()
+        return get_relpaths_recurse(index_dir)
+    
+    # xxx still needed??
+    # def _get_paths(self, path):
+    #     # todo: recurse wt --> list
+    #     return [path]
+
+            

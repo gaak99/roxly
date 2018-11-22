@@ -72,6 +72,10 @@ class Misc(object):
         self.mmdb.set('repo_local', self.repo)
         self.mmdb.dump()
 
+    def get_mmval(self, key):
+        self.mmdb_load()
+        return self.mmdb.get(key)
+
     def mmdb_load(self):
         if not self.mmdb:
             pn = PathName(self.repo, None, self.debug)

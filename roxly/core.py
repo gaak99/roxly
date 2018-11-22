@@ -49,6 +49,7 @@ from .cat import Cat
 from .clone import Clone
 from .diff import Diff
 from .merge3 import Merge3
+from .push import Push
 
 USER_AGENT = 'roxly/' + __version__
 ROXLYDIRVERSION = "1"
@@ -1380,6 +1381,11 @@ class Roxly():
     #     ancrev_field = PropertyField(ROXLY_PROP_ANCREV_NAME, ancrev)
     #     ancrev_prop_group = PropertyGroup(ROXLY_PROP_TEMPLATE_ID, [ancrev_field])
     #     return ancrev_prop_group
+        
+    def rox2_push(self, dry_run, addmemaybe, post_push_clone, filepath):
+        #print('core: rox2_push %s' % self.repo)
+        p = Push(self.repo, dry_run, addmemaybe, post_push_clone, filepath, self.debug)
+        p.push()
         
     def rox_push(self, dry_run, add, post_push_clone, filepath):
         """Push/upload staged file upstream to Dropbox.
