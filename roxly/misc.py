@@ -82,8 +82,10 @@ class Misc(object):
             
             mmdb_path_dir = pn.home_base_tmp()
             make_sure_path_exists(mmdb_path_dir)
-            
+
             mmdb_pathf = mmdb_path_dir + '/roxly' + ROXLYSEP1 + ROXLYMETAMETA
+            self._debug('mmdb_load: %s' % mmdb_pathf)
+
             self.mmdb = pickledb.load(mmdb_pathf, False)
             
     def mmdb_populate(self, src_url, nrevs, ancrev):
@@ -92,6 +94,8 @@ class Misc(object):
         
         orgzly_dir = src_url.split('//')[1].split('/')[0] #top dir only
         #mustdie ancdb_path = orgzly_dir + '/' + ANCDBNAME
+
+        self._debug('mmdb_populate: %s, %s, %s, %s' % (src_url, orgzly_dir, ancrev, nrevs))
 
         # Save meta meta & update master file path list
         self.mmdb.set('remote_origin', src_url)
