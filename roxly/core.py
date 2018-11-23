@@ -936,7 +936,8 @@ class Roxly():
             sys.exit(rt)
             
     def rox2_merge3(self, dry_run, merge_cmd, reva, revb, filepath):
-        m3 = Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.mmdb, self.debug, self)
+        #m3 = Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.mmdb, self.debug, self)
+        m3 = Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug, self)
         m3.merge()
     
     # def _rox_merge3_check_anchash(self, hash, anc_rev, reva, revb):

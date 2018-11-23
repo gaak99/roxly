@@ -45,12 +45,13 @@ class Merge3(object):
         fp  = self.filepath
         reva = self.reva
         revb = self.revb
-        rox = self.roxly#tmp
+        #rox = self.roxly#tmp
         dbg = self.debug
-        
-        pn = PathName(self.repo, fp, dbg)
+
+        df = Diff(self.repo, None, fp, dbg)
         log = Log(self.repo, fp, dbg)
         m = Misc(self.repo, fp, dbg)
+        pn = PathName(self.repo, fp, dbg)
         
         reva = log.head2rev(reva)
         revb = log.head2rev(revb)
@@ -58,15 +59,20 @@ class Merge3(object):
         pn.pull_me_maybe(reva)
         pn.pull_me_maybe(revb)
         
-        hash = self.mmdb.get('ancestor_rev') ##gbrox _hash
-        anc_rev = m.hash2rev(hash)
+        #hash = self.mmdb.get('ancestor_rev') ##gbrox _hash
+        hash = m.get_mmval('ancestor_rev') ##gbrox _hash
+        if not hash:
+            self._debug('debug merge3: ancestor (hash)=%s'
+                        % (hash))
+            sys.exit('Error: mmdb not populated. Was clone run?')
+            
         anc_rev = m.hash2rev(hash)
         self._debug('debug merge3: ancestor (hash)=%s, ancestor_rev=%s'
                     % (hash[:8], anc_rev))
 
         self._check_anchash(hash, anc_rev)
         
-        (fa, fb) = rox._get_diff_pair(reva, revb, fp)
+        (fa, fb) = df.get_diff_pair(reva, revb)
         f_anc = pn.wdrev_ln(anc_rev, suffix=':ANCESTOR')
         cmd = self._cmd_factory(fa, fb, f_anc)
         
