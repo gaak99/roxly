@@ -1076,8 +1076,10 @@ class Roxly():
     def rox_merge_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
         """If the 3-way diff/merge finished with some conflicts to resolve, run the editor to resolve them"
         """
-        Merge3(self.repo, dry_run, emacsclient_path,
-               mergerc_cmd, reva, revb, filepath, self.debug).merge_rc()
+        Merge3(self.repo, dry_run,
+               None, #merge cmd
+               reva, revb,
+               filepath, self.debug).merge_rc(emacsclient_path, mergerc_cmd)
 
     def rox_merge2(self, dry_run, emacsclient_path, merge_cmd, reva, revb, filepath):
         Merge3(self.repo, dry_run, merge_cmd,

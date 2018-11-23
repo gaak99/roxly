@@ -9,12 +9,19 @@ from .log import Log
 from .misc import Misc
 from .pathname import PathName
 
-# defaults 2-way diff/merge
 MERGE_BIN = "emacsclient"
 MERGE_EVAL = "--eval"
+
+# defaults 2-way diff/merge
 MERGE_EVALFUNC = "ediff-merge-files"
 DEFAULT_MERGE_CMD = MERGE_BIN + ' ' + MERGE_EVAL + ' \'('\
                     + MERGE_EVALFUNC + ' %s %s' + ')\''
+
+# defaults 3-way diff/merge
+MERGE3_EVALFUNC = "ediff-merge-with-ancestor"
+DEFAULT_MERGE3RC_CMD = MERGE_BIN + ' ' + MERGE_EVAL + ' \'('\
+                    + MERGE3_EVALFUNC + ' %s %s %s' + ')\''
+DEFAULT_EDIT_CMD = 'emacsclient %s'
 
 DIFF3_BIN = 'diff3'
 DIFF3_BIN_ARGS = '-m'
@@ -178,3 +185,63 @@ class Merge3(object):
             return
         
         os.system(shcmd)
+
+
+    #def merge3_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
+    def merge_rc(self, emacsclient_path, mergerc_cmd):
+        """Run mergerc_cmd to allow user to merge 3 revs.
+
+        merge_cmd format:  program %s %s
+        """
+        dry_run = self.dry_run
+        fp  = self.filepath
+        reva = self.reva
+        revb = self.revb
+        #merge_cmd = self.merge_cmd
+        #rox = self.roxly#tmp
+        dbg = self.debug
+
+        df = Diff(self.repo, None, fp, dbg)
+        log = Log(self.repo, fp, dbg)
+        m = Misc(self.repo, fp, dbg)
+        pn = PathName(self.repo, fp, dbg)
+
+        reva = log.head2rev(reva)
+        revb = log.head2rev(revb)
+        
+        pn.pull_me_maybe(reva)
+        pn.pull_me_maybe(revb)
+
+        hash = m.get_mmval('ancestor_rev') ##gbrox _hash
+        if not hash:
+            self._debug('debug merge_rc: ancestor (hash)=%s'
+                        % (hash))
+            sys.exit('Error: mmdb not populated. Was clone run?')
+            
+        anc_rev = m.hash2rev(hash)
+        self._debug('debug merge3: ancestor (hash)=%s, ancestor_rev=%s'
+                    % (hash[:8], anc_rev))
+
+        self._check_anchash(hash, anc_rev)
+        
+        f_anc = pn.wdrev_ln(anc_rev, suffix=':ANCESTOR')
+        (fa, fb) = df.get_diff_pair(reva, revb)
+        
+        qs = lambda s: '\"' + s + '\"'
+        
+        if mergerc_cmd:
+            shcmd = mergerc_cmd % (qs(fa), qs(fb), qs(f_anc))  # quotes cant hurt, eh?
+        elif emacsclient_path:
+            m_cmd = emacsclient_path + '/' + DEFAULT_MERGE3RC_CMD
+            shcmd = m_cmd % (qs(fa), qs(fb), qs(f_anc))
+        else:
+            shcmd = DEFAULT_MERGE3RC_CMD % (qs(fa), qs(fb), qs(f_anc))
+            
+        self._debug('debug mergerc: %s' % shcmd)
+        
+        if dry_run:
+            print('mergerc dry-run: %s' % shcmd)
+            return
+        
+        os.system(shcmd)
+        
