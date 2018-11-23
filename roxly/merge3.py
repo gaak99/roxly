@@ -31,7 +31,7 @@ class Merge3(object):
     filepath = attr.ib()
     #mmdb = attr.ib()
     debug = attr.ib()
-    roxly = attr.ib()
+    #roxly = attr.ib()
     #print('Merge3 init??? this thing on? roxly=%s' % type(roxly))
     #pn = PathName(self.repo, filepath, debug)
     #log = Log(repo, filepath, debug)
@@ -106,16 +106,17 @@ class Merge3(object):
 
     def  _run_cmd(self, cmd):
         fp = self.filepath
-        rox = self.roxly
         
         tmpf = '/tmp/tmproxlymerge3.' + str(os.getpid())
         fname = '/dev/null' if self.dry_run else tmpf
         with open(fname, 'w') as fout:
             rt = sp.call(cmd, stdout=fout)
-            rox._debug('debug merge3: rt=%d, fname=%s' % (rt, fname))
+            self._debug('debug merge3: rt=%d, fname=%s' % (rt, fname))
+            
             if self.dry_run:
                 print('merge3 dry-run: %s exit value=%d' % (cmd[0], rt))
                 sys.exit(rt)
+                
             if rt > 1:
                 print('Error: diff3 returned %d' % rt)
             if rt == 0:
@@ -130,6 +131,7 @@ class Merge3(object):
                 print('\tedit diff3 output: $EDITOR %s' % (fcon))
                 print('\t\t then run: mv %s %s' % (fcon, filepath))
                 print('\t\t then run: roxly push --add %s' % (filepath))
+                
             sys.exit(rt)
 
     def _cmd_factory(self, fa, fb, f_anc):

@@ -933,7 +933,7 @@ class Roxly():
             sys.exit(rt)
             
     def rox2_merge3(self, dry_run, merge_cmd, reva, revb, filepath):
-        Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug, self).merge()
+        Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug).merge()
     
     # def _rox_merge3_check_anchash(self, hash, anc_rev, reva, revb):
     #     if hash == None:
@@ -1067,14 +1067,21 @@ class Roxly():
         """
         self.merge3(dry_run, merge_cmd, reva, revb, filepath)
 
+
     def merge_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
         """If the 3-way diff/merge finished with some conflicts to resolve, run the editor to resolve them"
         """
         self.merge3_rc(dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath)
 
+    def rox_merge_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
+        """If the 3-way diff/merge finished with some conflicts to resolve, run the editor to resolve them"
+        """
+        Merge3(self.repo, dry_run, emacsclient_path,
+               mergerc_cmd, reva, revb, filepath, self.debug).merge_rc()
+
     def rox_merge2(self, dry_run, emacsclient_path, merge_cmd, reva, revb, filepath):
-        m = Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath,  self.debug, self)
-        m.merge2(emacsclient_path)
+        Merge3(self.repo, dry_run, merge_cmd,
+               reva, revb, filepath,  self.debug).merge2(emacsclient_path)
         
     def merge2(self, dry_run, emacsclient_path, merge_cmd, reva, revb, filepath):
         """Run merge_cmd to allow user to merge two revs.
