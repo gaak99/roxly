@@ -535,8 +535,7 @@ class Roxly():
         return pg[0].fields[0].value
     
     def rox2_clone(self, dry_run, src_url, nrevs):
-        cln = Clone(dry_run, src_url, nrevs, self.repo, self.debug)
-        cln.clone()
+        Clone(dry_run, src_url, nrevs, self.repo, self.debug).clone()
         
     def rox_clone(self, dry_run, src_url, nrevs):
         """Given a dropbox url for one file*, fetch the
@@ -736,8 +735,7 @@ class Roxly():
         os.system(shcmd)
 
     def rox_diff(self, diff_cmd, reva, revb, filepath):
-        d = Diff(self.repo, diff_cmd, filepath, self.debug)
-        d.diff(reva, revb)
+        Diff(self.repo, diff_cmd, filepath, self.debug).diff(reva, revb)
         
     def diff(self, diff_cmd, reva, revb, filepath):
         """Run diff_cmd to display diffs from two revisions of file.
@@ -798,8 +796,7 @@ class Roxly():
         os.system(shcmd)
             
     def rox_cat(self, cat_cmd, rev, filepath):
-        c = Cat(self.repo, cat_cmd, filepath, self.debug)
-        c.cat(rev)
+        c = Cat(self.repo, cat_cmd, filepath, self.debug).cat(rev)
         
     def cat(self, cat_cmd, rev, filepath):
         """Run cat_cmd to display cats from a revision of file.
@@ -936,9 +933,7 @@ class Roxly():
             sys.exit(rt)
             
     def rox2_merge3(self, dry_run, merge_cmd, reva, revb, filepath):
-        #m3 = Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.mmdb, self.debug, self)
-        m3 = Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug, self)
-        m3.merge()
+        Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug, self).merge()
     
     # def _rox_merge3_check_anchash(self, hash, anc_rev, reva, revb):
     #     if hash == None:
@@ -1165,8 +1160,7 @@ class Roxly():
                 nout += 1
 
     def rox_log(self, oneline, recent, filepath):
-        l = Log(self.repo, filepath, self.debug)
-        l.log(oneline, recent)
+        Log(self.repo, filepath, self.debug).log(oneline, recent)
         
     def log(self, oneline, recent, filepath):
         """List all local revisions (subset of) meta data""" 
