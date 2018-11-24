@@ -27,7 +27,7 @@ DIFF3_BIN = 'diff3'
 DIFF3_BIN_ARGS = '-m'
 
 @attr.s
-class Merge3(object):
+class Merge(object):
     """Run Unix command for 3-way merge (aka auto-merge when possible)
     """
     repo = attr.ib()
@@ -47,7 +47,7 @@ class Merge3(object):
         if self.debug:
             print(s)  # xxx stderr?
     
-    def merge(self):
+    def merge3(self):
         #print('Merge3 merge roxly=%s' % type(self.roxly))
         fp  = self.filepath
         reva = self.reva

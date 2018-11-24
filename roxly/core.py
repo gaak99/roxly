@@ -25,7 +25,7 @@ from .cat import Cat
 from .clone import Clone
 from .diff import Diff
 from .log import Log
-from .merge3 import Merge3
+from .merge import Merge
 from .misc import Misc
 from .status import Status
 from .push import Push
@@ -62,7 +62,7 @@ class Roxly():
         Log(self.repo, filepath, self.debug).log(oneline, recent)
 
     def rox2_merge3(self, dry_run, merge_cmd, reva, revb, filepath):
-        Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug).merge()
+        Merge(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug).merge3()
 
     def rox_merge_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
         Merge3(self.repo, dry_run,

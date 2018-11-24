@@ -2,7 +2,9 @@
 ### roxly dev harness script
 ##    nov18
 
-from roxly.core import Roxly, NREVS_MAX
+from roxly.core import Roxly
+
+NREVS_MAX=100
 
 #from . import __version__
 DEFAULT_CAT_CMD = 'cat %s'
@@ -67,15 +69,15 @@ if __name__ == '__main__':
     dry_run=True
     emacsclient_path=None
     merge_cmd=None
-    #roxme.rox_merge2(dry_run, emacsclient_path, merge_cmd, reva, revb, filepath)
     #roxme.merge(dry_run, merge_cmd, reva, revb, filepath)
+    #roxme.rox_merge2(dry_run, emacsclient_path, merge_cmd, reva, revb, filepath)
 
     ## merge3
     dry_run=True
     #emacsclient_path=None
     merge_cmd=None
     #roxme.rox_merge3(dry_run, merge_cmd, reva, revb, filepath)
-    #roxme.rox2_merge3(dry_run, merge_cmd, reva, revb, filepath)
+    roxme.rox2_merge3(dry_run, merge_cmd, reva, revb, filepath)
 
     ## merge3 rc
     emacsclient_path=None
