@@ -188,7 +188,7 @@ class Merge(object):
 
 
     #def merge3_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
-    def merge_rc(self, emacsclient_path, mergerc_cmd):
+    def merge3_rc(self, emacsclient_path, mergerc_cmd):
         """Run mergerc_cmd to allow user to merge 3 revs.
 
         merge_cmd format:  program %s %s

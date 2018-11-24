@@ -64,11 +64,11 @@ class Roxly():
     def rox2_merge3(self, dry_run, merge_cmd, reva, revb, filepath):
         Merge(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug).merge3()
 
-    def rox_merge_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
-        Merge3(self.repo, dry_run,
-               None, #merge cmd
-               reva, revb,
-               filepath, self.debug).merge_rc(emacsclient_path, mergerc_cmd)
+    def rox_merge3_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
+        Merge(self.repo, dry_run,
+              None, #merge cmd
+              reva, revb,
+              filepath, self.debug).merge3_rc(emacsclient_path, mergerc_cmd)
 
     def rox_merge2(self, dry_run, emacsclient_path, merge_cmd, reva, revb, filepath):
         Merge3(self.repo, dry_run, merge_cmd,
