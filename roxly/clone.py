@@ -151,23 +151,23 @@ class Clone(object):
 
         self.init()
 
-        filepath = self._get_filepath(src_url)
+        fp = self._get_filepath(src_url)
 
-        self._check_url_form(filepath)
+        self._check_url_form(fp)
 
-        self._check_fp_exists(filepath)
+        self._check_fp_exists(fp)
 
-        dbx = DbxOps(self.repo, filepath, self.debug)
-        ancrev = m.ancrev_get(filepath, ROXLY_PROP_TEMPLATE_ID) #gbrox anc hash !rev
+        dbx = DbxOps(self.repo, fp, self.debug)
+        ancrev = m.ancrev_get(fp, ROXLY_PROP_TEMPLATE_ID) #gbrox anc hash !rev
         self._debug('debug clone: downloaded ancestor hash=%s' % ancrev[:8])
 
         m.mmdb_populate(src_url, nrevs, ancrev)
 
-        m.repohome_files_put(filepath.strip('/'))
+        m.repohome_files_put(fp.strip('/'))
 
-        self._get_revs(filepath, nrevs)
+        self._get_revs(fp, nrevs)
 
-        self.checkout(filepath)
+        self.checkout(fp)
 
     def init(self):
         """Initialize local repo .roxly dir"""

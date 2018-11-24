@@ -11,7 +11,7 @@ if __name__ == '__main__':
     #print('roxmemayme: start')
     conf='~/.oxlyconfig'
     repo='.'
-    debug=True
+    debug=False
     roxme=Roxly(conf, repo, debug)
 
     ## clone --ancdb-init
@@ -27,8 +27,16 @@ if __name__ == '__main__':
     ## status
     #filepath='testdir2/roxly-test0.org'
     filepath='testdir3/roxme1.txt'
-    #roxme.status(filepath)
+    roxme.rox_status(filepath)
 
+    ## add
+    roxme.rox_add(dry_run, filepath)
+    roxme.rox_status(filepath)
+
+    ##reset
+    roxme.rox_reset(filepath)
+    roxme.rox_status(filepath)
+    
     ## metameta
     key='ancestor_rev'
     #roxme.getmm(key)
@@ -67,7 +75,11 @@ if __name__ == '__main__':
     #emacsclient_path=None
     merge_cmd=None
     #roxme.rox_merge3(dry_run, merge_cmd, reva, revb, filepath)
-    roxme.rox2_merge3(dry_run, merge_cmd, reva, revb, filepath)
+    #roxme.rox2_merge3(dry_run, merge_cmd, reva, revb, filepath)
+
+    ## merge3 rc
+    emacsclient_path=None
+    #roxme.rox_merge_rc(dry_run, emacsclient_path, merge_cmd, reva, revb, filepath)
     
     ## push
     #dry_run=True

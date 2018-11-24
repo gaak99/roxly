@@ -176,6 +176,31 @@ class Misc(object):
                   % (src, dest), end='')
             os.system('mv %s %s' % (src, dest))
             print(' done.')
-            #if self.mmdb:
-            #    self.mmdb = None #xxx del?
-        
+
+    def _reset_one_path(self, path):
+        fp = path
+
+        pn = PathName(self.repo, fp, self.debug)
+
+        ind_path = pn.index() + '/' + fp
+        if not os.path.isfile(ind_path):
+            sys.exit('error: file does not exist in index (staging area): %s'
+                     % fp)
+
+        os.unlink(ind_path)
+
+    def reset(self):
+        """Remove file from index (staging area)"""
+        fp = self.filepath
+
+        pn = PathName(self.repo, fp, self.debug)
+
+        self._debug('debug: start reset: %s' % fp)
+
+        if fp:
+            self._reset_one_path(fp)
+            return
+
+        fp_l = pn.get_index_paths()
+        for p in fp_l:
+            self._reset_one_path(p)

@@ -49,6 +49,7 @@ from .cat import Cat
 from .clone import Clone
 from .diff import Diff
 from .merge3 import Merge3
+from .misc import Misc
 from .status import Status
 from .push import Push
 
@@ -112,40 +113,8 @@ class Roxly():
         if os.path.isfile(self.mmdb_path):
             self.mmdb = pickledb.load(self.mmdb_path, False)
 
-    def checkout(self, filepath):
-        """Checkout/copy file from .roxly/ to working dir (wd).
-
-        if staged version exists revert wd one to it instead.
-        """
-        if filepath:
-            if not os.path.isfile(self._get_pname_by_rev(filepath)):
-                sys.exit('error: filepath name not found in repo home -- spelled correctly?')
-            fp_l = [filepath]
-        else:
-            fp_l = self._repohome_files_get()
-
-        if not fp_l:
-            print('internal error: checkout2 repo home empty')
-            sys.exit(1)
-    
-        make_sure_path_exists(self._get_pname_index())
-        for p in fp_l:
-            self._debug('debug checkout2 p=`%s`' % p)
-            p_wt, p_ind, p_head = self._get_fp_triple(p)
-            if p_wt:
-                #xxx save wt data first?
-                if p_ind:
-                    self._debug('debug checkout2: cp index wt')
-                    os.system('cp %s %s' % (p_ind, p_wt))
-                elif p_head:
-                    self._debug('debug checkout2: cp head wt')
-                    os.system('cp %s %s' % (p_head, p_wt))
-            else:
-                    self._debug('debug checkout2 no wt: cp head wt')
-                    make_sure_path_exists(
-                        os.path.dirname(self._get_pname_wt_path(p)))
-                    os.system('cp %s %s' % (p_head,
-                                            self._get_pname_wt_path(p)))
+    def rox_checkout(self, filepath):
+        Clone(dry_run, src_url, nrevs, self.repo, self.debug).checkout(filepath)
     
     def rox2_clone(self, dry_run, src_url, nrevs):
         Clone(dry_run, src_url, nrevs, self.repo, self.debug).clone()
@@ -153,22 +122,8 @@ class Roxly():
     def rox_add(self, dry_run, filepath):
         Push(self.repo, dry_run, None, None, filepath, self.debug).add()
 
-    def _reset_one_path(self, path):
-        ind_path = self._get_pname_index() + '/' + path
-        if not os.path.isfile(ind_path):
-            sys.exit('error: file does not exist in index (staging area): %s'
-                     % path)
-        os.unlink(ind_path)
-
-    def reset(self, filepath):
-        """Remove file from index (staging area)"""
-        self._debug('debug: start reset: %s' % filepath)
-        if filepath:
-            self._reset_one_path(filepath)
-            return
-        fp_l = self._get_index_paths()
-        for p in fp_l:
-            self._reset_one_path(p)
+    def rox_reset(self, filepath):
+        Misc(self.repo, filepath, self.debug).reset()
     
     def rox_status(self, filepath):
         Status(self.repo, filepath, self.debug).status()
