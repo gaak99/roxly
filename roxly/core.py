@@ -19,78 +19,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from __future__ import print_function
-
-from . import __version__
-
-import sys
 import os
-import random
-import filecmp
-import configparser
-import string
-import json
-import itertools
-import subprocess as sp
-import pickledb
-from functools import wraps
-import dropbox
-from dropbox.files import WriteMode
-from dropbox.exceptions import ApiError, AuthError
-##rox
-from dropbox.file_properties import PropertyFieldTemplate, PropertyType, PropertyField, PropertyGroup, PropertyGroupUpdate
-
-from .utils import make_sure_path_exists, get_relpaths_recurse, utc_to_localtz
-from .utils import calc_dropbox_content_hash
-
-from .log import Log
 
 from .cat import Cat
 from .clone import Clone
 from .diff import Diff
+from .log import Log
 from .merge3 import Merge3
 from .misc import Misc
 from .status import Status
 from .push import Push
-
-USER_AGENT = 'roxly/' + __version__
-ROXLYDIRVERSION = "1"
-ROXLYSEP1 = '::'
-ROXLYSEP2 = ':::'
-ROXLYHOME = '.roxly'
-ROXLYMETAMETA = 'metametadb.json'
-ROXLYINDEX = 'index'
-OLDDIR = '.old'
-LOGFILENAME = 'log.txt'
-HASHREVDB = 'hashrevdb.json'
-# 100 appears to be free Dropbox svc max, non-free max?
-NREVS_MAX = 100
-
-# defaults 2-way diff/merge
-MERGE_BIN = "emacsclient"
-MERGE_EVAL = "--eval"
-MERGE_EVALFUNC = "ediff-merge-files"
-DEFAULT_MERGE_CMD = MERGE_BIN + ' ' + MERGE_EVAL + ' \'('\
-                    + MERGE_EVALFUNC + ' %s %s' + ')\''
-DEFAULT_DIFF_CMD = 'diff %s %s'
-DEFAULT_CAT_CMD = 'cat %s'
-
-# defaults 3-way diff/merge
-MERGE3_EVALFUNC = "ediff-merge-with-ancestor"
-DEFAULT_MERGE3RC_CMD = MERGE_BIN + ' ' + MERGE_EVAL + ' \'('\
-                    + MERGE3_EVALFUNC + ' %s %s %s' + ')\''
-DEFAULT_EDIT_CMD = 'emacsclient %s'
-DIFF3_BIN = 'diff3'
-DIFF3_BIN_ARGS = '-m'
-ANCDBNAME = '_roxly_ancestor_pickledb.json'
-
-
-## dbxlabs
-#ROXLY_TEMPL_NAME = 'Roxly'
-#ROXLY_TEMPL_DESC = 'These properties hold the ancestor Dropbox revision of this file.'
-ROXLY_PROP_TEMPLATE_ID = 'ptid:uDbBKfpJCRUAAAAAAAADww'
-##gbrox  s/ancestor_rev/ancestor_hash ?? prolly
-ROXLY_PROP_ANCREV_NAME = 'ancestor_rev'
 
 class Roxly():
     """Roxly class -- use the Dropbox API to observ/merge
@@ -104,14 +42,6 @@ class Roxly():
         """
         self.debug = debug
         self.repo = os.getcwd() if roxly_repo == '.' else roxly_repo 
-        self.home = ROXLYHOME
-        self.conf = roxly_conf
-        self.dbx = None
-        self.mmdb_path_dir = self.repo + '/' + ROXLYHOME + '/.tmp'
-        #self.mmdb_path_dir = self._get_pname_home_base_tmp()
-        self.mmdb_path = self.mmdb_path_dir + '/roxly' + ROXLYSEP1 + ROXLYMETAMETA
-        if os.path.isfile(self.mmdb_path):
-            self.mmdb = pickledb.load(self.mmdb_path, False)
 
     def rox_checkout(self, filepath):
         Clone(dry_run, src_url, nrevs, self.repo, self.debug).checkout(filepath)
