@@ -32,14 +32,16 @@ class Misc(object):
         # where each is a fp if it exists else None.
         pn = PathName(self.repo, fp, self.debug)
 
+        self._debug('get_fp_triple: start %s' % fp)
+        
         wt = pn.wt_path()
-        self._debug('debug triple wt: %s' % wt)
         wt = None if not os.path.isfile(wt) else wt
         ind = pn.index_path(fp)
         ind = None if not os.path.isfile(ind) else ind
-        head = pn.by_rev(fp)
+        head = pn.by_rev()
         head = None if not os.path.isfile(head) else head
-        
+
+        self._debug('get_fp_triple: returning %s, %s, %s' % (wt, ind, head))
         return wt, ind, head
             
     def hash2rev(self, hash):
