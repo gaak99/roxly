@@ -43,27 +43,24 @@ class Roxly():
         self.debug = debug
         self.repo = os.getcwd() if roxly_repo == '.' else roxly_repo 
 
+    def rox_add(self, dry_run, filepath):
+        Push(self.repo, dry_run, None, None, filepath, self.debug).add()
+
+    def rox_cat(self, cat_cmd, rev, filepath):
+        c = Cat(self.repo, cat_cmd, filepath, self.debug).cat(rev)        
+            
     def rox_checkout(self, filepath):
         Clone(dry_run, src_url, nrevs, self.repo, self.debug).checkout(filepath)
     
     def rox2_clone(self, dry_run, src_url, nrevs):
         Clone(dry_run, src_url, nrevs, self.repo, self.debug).clone()
 
-    def rox_add(self, dry_run, filepath):
-        Push(self.repo, dry_run, None, None, filepath, self.debug).add()
-
-    def rox_reset(self, filepath):
-        Misc(self.repo, filepath, self.debug).reset()
-    
-    def rox_status(self, filepath):
-        Status(self.repo, filepath, self.debug).status()
-
     def rox_diff(self, diff_cmd, reva, revb, filepath):
         Diff(self.repo, diff_cmd, filepath, self.debug).diff(reva, revb)
             
-    def rox_cat(self, cat_cmd, rev, filepath):
-        c = Cat(self.repo, cat_cmd, filepath, self.debug).cat(rev)        
-            
+    def rox_log(self, oneline, recent, filepath):
+        Log(self.repo, filepath, self.debug).log(oneline, recent)
+
     def rox2_merge3(self, dry_run, merge_cmd, reva, revb, filepath):
         Merge3(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug).merge()
 
@@ -77,9 +74,12 @@ class Roxly():
         Merge3(self.repo, dry_run, merge_cmd,
                reva, revb, filepath,  self.debug).merge2(emacsclient_path)
 
-    def rox_log(self, oneline, recent, filepath):
-        Log(self.repo, filepath, self.debug).log(oneline, recent)
-
     def rox2_push(self, dry_run, addmemaybe, post_push_clone, filepath):
         Push(self.repo, dry_run, addmemaybe, post_push_clone, filepath, self.debug).push()
+
+    def rox_reset(self, filepath):
+        Misc(self.repo, filepath, self.debug).reset()
+    
+    def rox_status(self, filepath):
+        Status(self.repo, filepath, self.debug).status()
 
