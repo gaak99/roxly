@@ -14,7 +14,7 @@ setup(
         'dropbox>=9.1.0',
         'pytz',
         'tzlocal',
-        'pickledb',
+        'pickledb==0.8.0',
     ],
     entry_points='''
         [console_scripts]
