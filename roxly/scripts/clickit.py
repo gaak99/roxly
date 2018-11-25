@@ -20,7 +20,8 @@
 # SOFTWARE.
 
 import click
-from roxly.core import Roxly, NREVS_MAX
+from roxly.core import Roxly
+from roxly.clone import NREVS_MAX
 
 from . import __version__
 

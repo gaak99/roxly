@@ -281,6 +281,7 @@ $ /tmp/pypath/oxly --version
 oxly, version 0.10.11
 
 # note valid Dropbox auth token needed in ~/.oxlyconfig
+$ cd /tmp/pypath
 $ PATH=/tmp/pypath:$PATH bash oxly/tests/run-tests.sh
 ```
 
