@@ -8,6 +8,7 @@ import attr
 from dropbox.file_properties import PropertyFieldTemplate, PropertyType, PropertyField, PropertyGroup, PropertyGroupUpdate
 
 from .clone import Clone
+from .dbxops import DbxOps
 from .log import Log
 from .misc import Misc
 from .pathname import PathName
@@ -35,9 +36,6 @@ class Push(object):
         fp = self.filepath
         self._debug('_add_one_path: %s' % fp)
 
-        if self.dry_run:
-            return
-        
         pn = PathName(self.repo, fp, self.debug)
 
         index_path = pn.index()
@@ -48,6 +46,9 @@ class Push(object):
             
         wt = pn.wt_path()
         self._debug('debug _add_one_path cp %s %s' % (wt, index_path))
+        
+        if self.dry_run:
+            return
         
         make_sure_path_exists(index_path)
         
@@ -68,7 +69,21 @@ class Push(object):
         #ancrev_prop_group = PropertyGroup(ROXLY_PROP_TEMPLATE_ID, [ancrev_field])
         return lambda x: PropertyGroup(ROXLY_PROP_TEMPLATE_ID,
                                   [PropertyField(ancrev_name, x)])
-    
+
+    def _upload_one_path(self, fp, local_path, rem_path, ancout, pg):
+        self._debug('_upload_one_path: %s' % fp)
+
+        dbx = DbxOps(self.repo, fp, self.debug)
+        
+        with open(local_path, 'rb') as f:
+            print("Uploading staged " + fp + " to Dropbox as " +
+                  rem_path + " " + ancout + " ...", end='')
+            
+            if self.dry_run:
+                return
+        
+            dbx.upload_file(f, rem_path, log.head2rev('HEAD'), pg)
+
     def _push_one_path(self):
         # Push a given path upstream
         fp = self.filepath
@@ -107,37 +122,6 @@ class Push(object):
         
         return hash
 
-    def _upload_one_path(self, fp, local_path, rem_path, ancout, pg):
-        self._debug('_upload_one_path: %s' % fp)
-
-        if self.dry_run:
-            return
-        
-        dbx = DbxOps(self.repo, fp, self.debug)
-        
-        with open(local_path, 'rb') as f:
-            print("Uploading staged " + fp + " to Dropbox as " +
-                  rem_path + " " + ancout + " ...", end='')
-            
-            try:
-                dbx.files_upload(f.read(), rem_path, mode=WriteMode('overwrite'),
-                                      property_groups=[pg])
-                print(' done.')
-            except ApiError as err:
-                # This checks for the specific error where a user doesn't have
-                # enough Dropbox space quota to upload this file
-                if (err.error.is_path() and
-                    err.error.get_path().error.is_insufficient_space()):
-                    sys.exit("ERROR: Cannot back up; insufficient space.")
-                elif err.user_message_text:
-                    print(err.user_message_text)
-                    sys.exit(100)
-                else:
-                    print(err)
-                    sys.exit(101)
-            except Exception as err:
-                sys.exit('Call to Dropbox to upload file data failed: %s' % err)
-
     def push(self):
         """Push/upload staged file upstream to Dropbox.
 
@@ -166,7 +150,7 @@ class Push(object):
         self._push_one_path()
 
         if self.dry_run:
-            print('push dryrun add: %s' % self.addmemaybe)
+            print('\npush dryrun add: %s' % self.addmemaybe)
             print('push dryrun filepath: %s' % fp)
             print('push dryrun from local repo: %s' % self.repo)
             print('push dryrun to remote repo: %s' %

@@ -107,3 +107,25 @@ class DbxOps(object):
         if not revs:
             self._debug('debug: _get_revs_md rt not')
         return revs
+
+    @dbxauth
+    def upload_file(self, fd, rem_path, rev, pg):
+        try:
+            #dbx.files_upload(f.read(), rem_path, mode=WriteMode('overwrite'),
+            dbx.files_upload(fd.read(), rem_path, mode=WriteMode.update(rev),
+                             property_groups=[pg])
+            print(' done.')
+        except ApiError as err:
+            # This checks for the specific error where a user doesn't have
+            # enough Dropbox space quota to upload this file
+            if (err.error.is_path() and
+                err.error.get_path().error.is_insufficient_space()):
+                sys.exit("ERROR: Cannot back up; insufficient space.")
+            elif err.user_message_text:
+                print(err.user_message_text)
+                sys.exit(100)
+            else:
+                print(err)
+                sys.exit(101)
+        except Exception as err:
+                sys.exit('Call to Dropbox to upload file data failed: %s' % err)

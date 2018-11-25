@@ -36,8 +36,8 @@ if __name__ == '__main__':
     roxme.rox_status(filepath)
 
     ##reset
-    roxme.rox_reset(filepath)
-    roxme.rox_status(filepath)
+    #roxme.rox_reset(filepath)
+    #roxme.rox_status(filepath)
     
     ## metameta
     key='ancestor_rev'
@@ -91,4 +91,4 @@ if __name__ == '__main__':
     post_push_clone=True
     #roxme.push(dry_run, add, post_push_clone, filepath)
     #roxme.rox_push(dry_run, add, post_push_clone, filepath)
-    #roxme.rox2_push(dry_run, add, post_push_clone, filepath)
+    roxme.rox2_push(dry_run, add, post_push_clone, filepath)
