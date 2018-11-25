@@ -52,7 +52,7 @@ class Roxly():
     def rox_checkout(self, filepath):
         Clone(dry_run, src_url, nrevs, self.repo, self.debug).checkout(filepath)
     
-    def rox2_clone(self, dry_run, src_url, nrevs):
+    def clone(self, dry_run, src_url, nrevs):
         Clone(dry_run, src_url, nrevs, self.repo, self.debug).clone()
 
     def rox_diff(self, diff_cmd, reva, revb, filepath):
@@ -80,6 +80,6 @@ class Roxly():
     def rox_reset(self, filepath):
         Misc(self.repo, filepath, self.debug).reset()
     
-    def rox_status(self, filepath):
+    def status(self, filepath):
         Status(self.repo, filepath, self.debug).status()
 

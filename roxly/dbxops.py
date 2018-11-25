@@ -10,6 +10,8 @@ from dropbox.exceptions import ApiError, AuthError
 from dropbox.files import WriteMode
 
 from . import __version__
+from .pathname import PathName
+
 #nonono from .misc import Misc
 
 USER_AGENT = 'roxly/' + __version__
@@ -71,16 +73,18 @@ class DbxOps(object):
         dest = self.repo
         self._debug('_download_data_one_rev: %s, %s, %s' % (rev, src, dest))
 
-        pn = PathName(self.repo, None, self.debug)
+        pn = PathName(self.repo, src[1:], self.debug)
         
-        dest_data = pn.by_rev(src, rev)
-        self._debug('_download_one_rev: dest_data %s' % dest_data)
+        dest_data = pn.by_rev(rev)
+        if not dest_data:
+            sys.exit('dbxops: internal error: download_data_one_rev dest_data is None')
+            
+        self._debug('_download_data_one_rev: dest_data=%s' % dest_data)
         
         try:
             self.dbx.files_download_to_file(dest_data, src, rev)
         except Exception as err:
-            print('Call to Dropbox to download file data failed: %s' % err)
-            sys.exit(1)
+            sys.exit('Call to Dropbox to download file -- %s -- data failed: %s' % (src, err))
 
     def _get_conf(self, key):
         path = os.path.expanduser(self.conf)

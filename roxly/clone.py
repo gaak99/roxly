@@ -107,24 +107,23 @@ class Clone(object):
             fp_l = m.repohome_files_get()
 
         if not fp_l:
-            print('internal error: checkout2 repo home empty')
-            sys.exit(1)
+            sys.exit('internal error: checkout2 repo home empty')
     
         make_sure_path_exists(pn.index())
         
         for p in fp_l:
-            self._debug('debug checkout2 p=`%s`' % p)
+            self._debug('checkout2 p=`%s`' % p)
             p_wt, p_ind, p_head = m.get_fp_triple(p)
             if p_wt:
                 #xxx save wt data first?
                 if p_ind:
-                    self._debug('debug checkout2: cp index wt')
+                    self._debug('checkout2: cp index wt')
                     os.system('cp %s %s' % (p_ind, p_wt))
                 elif p_head:
-                    self._debug('debug checkout2: cp head wt')
+                    self._debug('checkout2: cp head wt')
                     os.system('cp %s %s' % (p_head, p_wt))
             else:
-                    self._debug('debug checkout2 no wt: cp head wt')
+                    self._debug('checkout2: no wt, cp head wt')
                     make_sure_path_exists(
                         os.path.dirname(pn.wt_path(p)))
                     os.system('cp %s %s' % (p_head,
@@ -210,11 +209,7 @@ class Clone(object):
             if self.debug:
                 print()
 
-            try:    
-                dbx.download_data_one_rev(rev, filepath)
-            except Exception as err:
-                print('Call to Dropbox to download file data failed: %s' % err)
-                sys.exit(1)
+            dbx.download_data_one_rev(rev, filepath)
 
             print(' done.')
         else:

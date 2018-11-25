@@ -33,7 +33,7 @@ from . import __version__
               help='User config file, default is ~/.roxlyconfig,\nVar list (INI format):\n[misc]\nauth_token=$mytoken')
 @click.option('--roxly-repo', envvar='ROXLY_REPO', default='.',
               help='Local dir to store working dir and .roxly.')
-@click.option('--debug/--no-debug', default=False,
+@click.option('--debug/--no-debug', default=True,
                         envvar='ROXLY_DEBUG')
 @click.pass_context
 def cli(ctx, roxly_conf, roxly_repo, debug):
@@ -53,14 +53,15 @@ def reset(roxly, filepath):
 
 @cli.command(help='Download revisions of Dropbox file to local dir/repo and checkout HEAD to working dir. Local dir default is $PWD but can be set (see global opts), SRC format: dropbox://<orgzly>/[/<subdirs>/]<file.org>')
 @click.option('--dry-run/--no-dry-run', default=False)
-@click.option('--init-ancdb/--no-init-ancdb', default=False)
+#@click.option('--init-ancdb/--no-init-ancdb', default=False)
 @click.option('--nrevs',
               help='Number of latest metadata of revisions (defaults to 50) to download from Dropbox.',
               required=False, default=NREVS_MAX)
 @click.argument('src')
 @click.pass_obj
-def clone(roxly, dry_run, src, nrevs, init_ancdb):
-    roxly.clone(dry_run, src, nrevs, init_ancdb)
+#def clone(roxly, dry_run, src, nrevs, init_ancdb):
+def clone(roxly, dry_run, src, nrevs):
+    roxly.clone(dry_run, src, nrevs)
 
 ##roxme    
 @cli.command(help='Download revisions of Dropbox file to local dir/repo and checkout HEAD to working dir. Local dir default is $PWD but can be set (see global opts), SRC format: dropbox://<orgzly>/[/<subdirs>/]<file.org>')

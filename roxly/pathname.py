@@ -25,9 +25,9 @@ class PathName(object):
             print(s)  # xxx stderr?
     
     def by_rev(self, rev='head'):
-        self._debug('by_rev: rev=%s' % rev)
-
         fp = self.filepath
+        
+        self._debug('by_rev: fp=%s, rev=%s' % (fp, rev))
         
         if rev == 'head' or rev == 'headminus1':
             rev = self._log_head2rev(fp, rev)
@@ -58,11 +58,15 @@ class PathName(object):
     
     def home_revsdir(self):
         fp = self.filepath
+        
         base_path = self.home_base()
         path_dir = os.path.dirname(fp)
         path_f = os.path.basename(fp)
 
-        return base_path + '/' + path_dir + '/' + ROXLYHOME + ROXLYSEP1 + path_f
+        p = base_path + '/' + path_dir + '/' + ROXLYHOME + ROXLYSEP1 + path_f
+
+        self._debug('home_revsdir: result=%s' % p)
+        return p
 
     def hrdbpath(self):
         # one per file
@@ -105,9 +109,17 @@ class PathName(object):
 
         return dest
 
-    def wt_path(self):
-        self._debug('wt_path: repo=%s, fp=%s' % (self.repo, self.filepath))
-        return self.repo_base() + '/' + self.filepath
+    def wt_path(self, fp=None):
+        if not fp:
+            fp = self.filepath
+
+        self._debug('wt_path: repo=%s, fp=%s' % (self.repo, fp))
+
+        p = self.repo_base() + '/' + fp[1:]
+
+        self._debug('wt_path: result=%s' % (p))
+                
+        return p
 
     def wt_paths(self):
         wt_dir = self.repo_base()
