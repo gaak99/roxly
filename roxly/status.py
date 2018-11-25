@@ -25,9 +25,11 @@ class Status(object):
         m = Misc(self.repo, fp, self.debug)
         pn = PathName(self.repo, fp, self.debug)
 
+        self._debug('status: %s' % fp)
         if fp:
             if not os.path.isfile(pn.wt_path()):
-                sys.exit('error: file name not found in repo wt -- spelled correctly?')
+                sys.exit('error: file not found in repo working dir -- %s -- spelled correctly? clone run first?'
+                         % pn.wt_path())
             fp_l = [fp]
         else:
             fp_l = pn.get_wt_paths()
