@@ -27,8 +27,8 @@ from .diff import Diff
 from .log import Log
 from .merge import Merge
 from .misc import Misc
-from .status import Status
 from .push import Push
+from .status import Status
 
 class Roxly():
     """Roxly class -- use the Dropbox API to observ/merge
@@ -46,7 +46,7 @@ class Roxly():
     def rox_add(self, dry_run, filepath):
         Push(self.repo, dry_run, None, None, filepath, self.debug).add()
 
-    def rox_cat(self, cat_cmd, rev, filepath):
+    def cat(self, cat_cmd, rev, filepath):
         c = Cat(self.repo, cat_cmd, filepath, self.debug).cat(rev)        
             
     def rox_checkout(self, filepath):
@@ -55,10 +55,10 @@ class Roxly():
     def clone(self, dry_run, src_url, nrevs):
         Clone(dry_run, src_url, nrevs, self.repo, self.debug).clone()
 
-    def rox_diff(self, diff_cmd, reva, revb, filepath):
+    def diff(self, diff_cmd, reva, revb, filepath):
         Diff(self.repo, diff_cmd, filepath, self.debug).diff(reva, revb)
             
-    def rox_log(self, oneline, recent, filepath):
+    def log(self, oneline, recent, filepath):
         Log(self.repo, filepath, self.debug).log(oneline, recent)
 
     def rox2_merge3(self, dry_run, merge_cmd, reva, revb, filepath):

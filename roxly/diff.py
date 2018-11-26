@@ -61,7 +61,9 @@ class Diff(object):
 
         if fp:
             if not os.path.isfile(pn.wt_path()):
-                sys.exit('error: file name not found in repo working dir -- spelled correctly?')
+                sys.exit('error: file not found in repo working dir -- %s -- spelled correctly? clone run first?'
+                         % pn.wt_path())
+
             fp_l = [fp]
         else:
             fp_l = pn.wt_paths()
