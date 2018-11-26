@@ -101,7 +101,9 @@ class Clone(object):
         if filepath:
             fp = pn.by_rev() #default==head
             if not os.path.isfile(fp):
-                sys.exit('ERROR: filepath name not found in repo home -- `%s` spelled correctly?' % fp)
+                sys.exit('error: file not found in repo working dir -- %s -- spelled correctly? clone run first?'
+                         % pn.wt_path())
+
             fp_l = [filepath]
         else:
             fp_l = m.repohome_files_get()
