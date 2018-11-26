@@ -90,21 +90,21 @@ class PathName(object):
         """Return linked file path of rev::suffix in wd.
         """
         fp = self.filepath
-        self._debug("_get_pname_wdrev_ln: %s, %s" % (fp, rev))
+        self._debug("_wdrev_ln: %s, %s" % (fp, rev))
         src = self.by_rev(rev)
         dest = self.by_wdrev(rev)
         dest = dest + suffix
         if not os.path.isfile(dest):
-            self._debug("_get_pname_wdrev_ln no dest lets ln it: %s, %s" % (src, dest))
+            self._debug("wdrev_ln no dest lets ln it: %s, %s" % (src, dest))
             os.system("ln %s %s" % (src, dest))
         else:
             isrc = os.stat(src).st_ino
             idest = os.stat(dest).st_ino
-            self._debug("_get_pname_wdrev_ln: src/dest got dest file now cmp inodes (%d)" % isrc)
+            self._debug("wdrev_ln: src/dest got dest file now cmp inodes (%d)" % isrc)
             if isrc != idest:
                 make_sure_path_exists(OLDDIR)
                 os.system("mv %s %s" % (dest, OLDDIR))
-                self._debug("_get_pname_wdrev_ln: post old ln mv, src/dest hard linkn me maybe")
+                self._debug("wdrev_ln: post old ln mv, src/dest hard linkn me maybe")
                 os.system("ln %s %s" % (src, dest))
 
         return dest
@@ -115,7 +115,9 @@ class PathName(object):
 
         self._debug('wt_path: repo=%s, fp=%s' % (self.repo, fp))
 
-        p = self.repo_base() + '/' + fp[1:]
+        fp = fp if fp[0] != '/' else fp[1:]
+
+        p = self.repo_base() + '/' + fp
 
         self._debug('wt_path: result=%s' % (p))
                 
