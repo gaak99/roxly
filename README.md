@@ -270,19 +270,20 @@ $ oxly cat orgzly/foo.org
 
 ```bash
 $ export PYTHONPATH=/tmp/pypath
-$ mkdir /tmp/pypath && python setup.py develop --install-dir /tmp/pypath
+$ mkdir /tmp/py3path && python3 setup.py develop --install-dir /tmp/py3path
 
 # If you bumpup the version of dev pkg and have a prev version installed globally,
 # you will probably have to uninstall global version to test dev version.
-$ oxly --version
+$ roxly --version
 oxly, version 0.10.10
 $ sudo python -m pip uninstall oxly
-$ /tmp/pypath/oxly --version
+$ /tmp/py3path/roxly --version
 oxly, version 0.10.11
 
 # note valid Dropbox auth token needed in ~/.oxlyconfig
-$ cd /tmp/pypath
-$ PATH=/tmp/pypath:$PATH bash oxly/tests/run-tests.sh
+$ cd /tmp/py3path
+$ PATH=/tmp/py3path:$PATH  ./roxly --version
+$ PATH=/tmp/py3path:$PATH bash roxly/tests/run-tests.sh
 ```
 
 # Legalese
