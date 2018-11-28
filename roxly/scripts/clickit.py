@@ -149,7 +149,8 @@ def merge2(roxly, dry_run, emacsclient_path, merge_cmd, reva, revb, filepath):
 @click.argument('filepath')
 @click.pass_obj
 def mergerc(roxly, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
-    roxly.merge_rc(dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath)
+    #roxly.merge_rc(dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath)
+    roxly.merge3_rc(dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath)
 
 @cli.command(help='Upload result of locally merged files to Dropbox.')
 @click.option('--dry-run/--no-dry-run', default=False)

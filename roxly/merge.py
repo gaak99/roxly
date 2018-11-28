@@ -220,7 +220,7 @@ class Merge(object):
                     % (hash[:8], anc_rev))
 
         #self._check_anchash(hash, anc_rev)
-        self._check_revs(hash, anc_rev)
+        self._check_revs(anc_rev)
 
         ## All 3 revs look sane, make sure we have local copies.
         pn.pull_me_maybe(reva)
