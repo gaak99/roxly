@@ -107,8 +107,10 @@ class Merge(object):
             print('Warning: does not look like a merge is necessary, try Sync on Orgzly.')
             sys.exit('Warning: you can still do a 2-way merge if necessary (roxly merge2 --help).')
 
-    def  _run_cmd(self, cmd):
+    def _run_cmd(self, cmd):
         fp = self.filepath
+        reva = self.reva
+        revb = self.revb
         
         tmpf = '/tmp/tmproxlymerge3.' + str(os.getpid())
         fname = '/dev/null' if self.dry_run else tmpf
@@ -124,17 +126,17 @@ class Merge(object):
             if rt > 1:
                 print('Error: diff3 returned %d' % rt)
             if rt == 0:
-                os.system('mv %s %s' % (fname, filepath))
-                print('No conflicts found. File fully merged locally in %s'  % filepath)
+                os.system('mv %s %s' % (fname, fp))
+                print('No conflicts found. File fully merged locally in %s'  % fp)
             if rt == 1:
-                fcon = filepath + ':CONFLICT'
+                fcon = fp + ':CONFLICT'
                 os.system('mv %s %s' % (fname, fcon))
                 print('Conflicts found, pls run either ...')
-                print('\temacsclient ediff 3-way merge: roxly mergerc --reva %s --revb %s %s' % (reva, revb, filepath))
-                print('\t\t then run: roxly push --add %s' % (filepath))
+                print('\temacsclient ediff 3-way merge: roxly mergerc --reva %s --revb %s %s' % (reva, revb, fp))
+                print('\t\t then run: roxly push --add %s' % (fp))
                 print('\tedit diff3 output: $EDITOR %s' % (fcon))
-                print('\t\t then run: mv %s %s' % (fcon, filepath))
-                print('\t\t then run: roxly push --add %s' % (filepath))
+                print('\t\t then run: mv %s %s' % (fcon, fp))
+                print('\t\t then run: roxly push --add %s' % (fp))
                 
             sys.exit(rt)
 
@@ -206,10 +208,8 @@ class Merge(object):
         reva = log.head2rev(reva)
         revb = log.head2rev(revb)
         
-        pn.pull_me_maybe(reva)
-        pn.pull_me_maybe(revb)
-
-        hash = m.get_mmval('ancestor_rev') ##gbrox _hash
+        #hash = m.get_mmval('ancestor_rev') ##gbrox _hash
+        hash = m.get_mmval('ancestor_hash') ##gbrox _hash
         if not hash:
             self._debug('debug merge_rc: ancestor (hash)=%s'
                         % (hash))
@@ -219,8 +219,14 @@ class Merge(object):
         self._debug('debug merge3: ancestor (hash)=%s, ancestor_rev=%s'
                     % (hash[:8], anc_rev))
 
-        self._check_anchash(hash, anc_rev)
-        
+        #self._check_anchash(hash, anc_rev)
+        self._check_revs(hash, anc_rev)
+
+        ## All 3 revs look sane, make sure we have local copies.
+        pn.pull_me_maybe(reva)
+        pn.pull_me_maybe(revb)
+        pn.pull_me_maybe(anc_rev)
+
         f_anc = pn.wdrev_ln(anc_rev, suffix=':ANCESTOR')
         (fa, fb) = df.get_diff_pair(reva, revb)
         
