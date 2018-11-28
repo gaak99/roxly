@@ -61,7 +61,7 @@ class Roxly():
     def log(self, oneline, recent, filepath):
         Log(self.repo, filepath, self.debug).log(oneline, recent)
 
-    def rox2_merge3(self, dry_run, merge_cmd, reva, revb, filepath):
+    def merge(self, dry_run, merge_cmd, reva, revb, filepath):
         Merge(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug).merge3()
 
     def rox_merge3_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):

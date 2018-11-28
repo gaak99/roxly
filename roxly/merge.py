@@ -67,17 +67,16 @@ class Merge(object):
         pn.pull_me_maybe(revb)
         
         #hash = self.mmdb.get('ancestor_rev') ##gbrox _hash
-        hash = m.get_mmval('ancestor_rev') ##gbrox _hash
-        if not hash:
-            self._debug('debug merge3: ancestor (hash)=%s'
-                        % (hash))
-            sys.exit('Error: mmdb not populated. Was clone run?')
-            
-        anc_rev = m.hash2rev(hash)
-        self._debug('debug merge3: ancestor (hash)=%s, ancestor_rev=%s'
-                    % (hash[:8], anc_rev))
+        hash = m.get_mmval('ancestor_hash') ##gbrox _hash
+        if hash == None:
+            print('Warning: ancestor_hash not found, cant do a 3-way merge.')
+            sys.exit('Warning: you can still do a 2-way merge (roxly merge2 --help).')
 
-        self._check_anchash(hash, anc_rev)
+        anc_rev = m.hash2rev(hash)
+        self._debug('merge3: ancestor_rev=%s' % (anc_rev))
+
+        #self._check_ancrev(anc_rev)
+        self._check_revs(anc_rev)
         
         (fa, fb) = df.get_diff_pair(reva, revb)
         f_anc = pn.wdrev_ln(anc_rev, suffix=':ANCESTOR')
@@ -88,16 +87,13 @@ class Merge(object):
 
         self._run_cmd(cmd)
 
-    def _check_anchash(self, hash, anc_rev):
+    #def _check_anchash(self, hash, anc_rev):
+    def _check_revs(self, anc_rev):
         reva = self.reva
         revb = self.revb
 
-        if hash == None:
-            print('Warning hash==None: cant do a 3-way merge as ancestor revision not found.')
-            sys.exit('Warning: you can still do a 2-way merge (roxly merge2 --help).')
-            
         if anc_rev == None: #not enough revs downloaded 
-            print('Warning ancrev==None: cant do a 3-way merge as no ancestor revision found.')
+            print('Warning: ancestor rev not found, cant do a 3-way merge.')
             sys.exit('Warning: you can still do a 2-way merge (roxly merge2 --help).')
             sys.exit(1)
 
@@ -118,7 +114,8 @@ class Merge(object):
         fname = '/dev/null' if self.dry_run else tmpf
         with open(fname, 'w') as fout:
             rt = sp.call(cmd, stdout=fout)
-            self._debug('debug merge3: rt=%d, fname=%s' % (rt, fname))
+            self._debug('merge3: rt=%d, cmd=%s' % (rt, cmd))
+            #self._debug('debug merge3: rt=%d, fname=%s' % (rt, fname))
             
             if self.dry_run:
                 print('merge3 dry-run: %s exit value=%d' % (cmd[0], rt))

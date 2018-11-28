@@ -1,6 +1,6 @@
 
 import os
-#import sys
+import sys
 
 import attr
 
@@ -58,6 +58,7 @@ class PathName(object):
     
     def home_revsdir(self):
         fp = self.filepath
+        self._debug('home_revsdir: fp=%s' % fp)
         
         base_path = self.home_base()
         path_dir = os.path.dirname(fp)
@@ -90,12 +91,19 @@ class PathName(object):
         """Return linked file path of rev::suffix in wd.
         """
         fp = self.filepath
-        self._debug("_wdrev_ln: %s, %s" % (fp, rev))
+        
+        self._debug("wdrev_ln: %s, %s" % (fp, rev))
+        
         src = self.by_rev(rev)
         dest = self.by_wdrev(rev)
         dest = dest + suffix
+
+        if not os.path.isfile(src):
+            sys.exit('Internal error: pathname wdrev_ln src ENOEXIST: %s, %s' % (src, dest))
+            
         if not os.path.isfile(dest):
-            self._debug("wdrev_ln no dest lets ln it: %s, %s" % (src, dest))
+            self._debug("wdrev_ln: no dest lets ln it  src=%s, dest=%s" % (src, dest))
+            
             os.system("ln %s %s" % (src, dest))
         else:
             isrc = os.stat(src).st_ino
@@ -104,7 +112,9 @@ class PathName(object):
             if isrc != idest:
                 make_sure_path_exists(OLDDIR)
                 os.system("mv %s %s" % (dest, OLDDIR))
+                
                 self._debug("wdrev_ln: post old ln mv, src/dest hard linkn me maybe")
+                
                 os.system("ln %s %s" % (src, dest))
 
         return dest

@@ -64,15 +64,15 @@ def clone(roxly, dry_run, src, nrevs):
     roxly.clone(dry_run, src, nrevs)
 
 ##roxme    
-@cli.command(help='Download revisions of Dropbox file to local dir/repo and checkout HEAD to working dir. Local dir default is $PWD but can be set (see global opts), SRC format: dropbox://<orgzly>/[/<subdirs>/]<file.org>')
-@click.option('--dry-run/--no-dry-run', default=False)
-@click.option('--nrevs',
-              help='Number of latest metadata of revisions (defaults to 50) to download from Dropbox.',
-              required=False, default=NREVS_MAX)
-@click.argument('src')
-@click.pass_obj
-def rox_clone(roxly, dry_run, src, nrevs):
-    roxly.rox_clone(dry_run, src, nrevs)
+# @cli.command(help='Download revisions of Dropbox file to local dir/repo and checkout HEAD to working dir. Local dir default is $PWD but can be set (see global opts), SRC format: dropbox://<orgzly>/[/<subdirs>/]<file.org>')
+# @click.option('--dry-run/--no-dry-run', default=False)
+# @click.option('--nrevs',
+#               help='Number of latest metadata of revisions (defaults to 50) to download from Dropbox.',
+#               required=False, default=NREVS_MAX)
+# @click.argument('src')
+# @click.pass_obj
+# def rox_clone(roxly, dry_run, src, nrevs):
+#     roxly.rox_clone(dry_run, src, nrevs)
     
 @cli.command(help='Run diff(1) to display the data differences of two revisions.')
 @click.option('--diff-cmd', required=False,

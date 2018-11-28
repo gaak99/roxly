@@ -90,21 +90,22 @@ class Misc(object):
 
             self.mmdb = pickledb.load(mmdb_pathf, False)
             
-    def mmdb_populate(self, src_url, nrevs, ancrev):
+    def mmdb_populate(self, src_url, nrevs, anchash):
         # Concoct&save orgzly_dir path
         self.mmdb_load()
         
         orgzly_dir = src_url.split('//')[1].split('/')[0] #top dir only
         #mustdie ancdb_path = orgzly_dir + '/' + ANCDBNAME
 
-        self._debug('mmdb_populate: %s, %s, %s, %s' % (src_url, orgzly_dir, ancrev, nrevs))
+        self._debug('mmdb_populate: %s, %s, %s, %s' % (src_url, orgzly_dir, anchash, nrevs))
 
         # Save meta meta & update master file path list
         self.mmdb.set('remote_origin', src_url)
         self.mmdb.set('orgzly_dir', orgzly_dir)
         #self.mmdb.set('ancdb_path', ancdb_path)
         ##gbrox s/ancestor_rev/ancestor_hash ??
-        self.mmdb.set('ancestor_rev', ancrev)
+        #self.mmdb.set('ancestor_rev', anchash)
+        self.mmdb.set('ancestor_hash', anchash)
         self.mmdb.set('nrevs', nrevs)
         self.mmdb.dump()
 

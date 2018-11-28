@@ -63,31 +63,44 @@ class Clone(object):
 
         return filepath
     
-    def _get_revs(self, filepath, nrevs):
-        # Finally! download the revs data and checkout themz to wt
-        self._debug('debug clone: download %d revs of %s to %s' % (nrevs,
-                                                                   filepath,
-                                                                   self.repo))
-        dbx = DbxOps(self.repo, filepath, self.debug)
-        log = Log(self.repo, filepath, self.debug)
-        pn = PathName(self.repo, filepath, self.debug)
+    def _get_revs_md_logem(self, filepath, nrevs):
+        fp = filepath
         
+        dbx = DbxOps(self.repo, fp, self.debug)
+        log = Log(self.repo, fp, self.debug)
+        pn = PathName(self.repo, fp, self.debug)
+
         # Get revs' metadata
         print("Downloading metadata of %d (max) latest revisions on Dropbox ..." %
               nrevs, end='')
-        md_l = dbx.get_revs_md(filepath, nrevs)
+        md_l = dbx.get_revs_md(fp, nrevs)
         print(' done.')
         
         log.revs_md(md_l, pn.logpath(), pn.hrdbpath())
+
+        h = md_l[0].rev
+        h1 = md_l[1].rev if len(md_l) > 1 else None
+
+        self._debug('_get_revs_md_logem: ret h=%s, h1=%s' % (h, h1))
+        return h, h1
+
+    #def _get_revs_data(self, filepath, head, headminus1, ancrev):
+    def _get_revs_data(self, filepath, head, headminus1):
+        # Download head/headminus1 revs data
+        fp = filepath
         
-        print('Checking 2 latest revisions in Dropbox...')
+        print('Checking/downloading 2 latest revisions data in Dropbox...')
         
-        self.pull(md_l[0].rev, filepath)
-        if len(md_l) > 1:
-            self.pull(md_l[1].rev, filepath)
+        self.pull(head, fp)
+        if headminus1:
+            self.pull(headminus1, fp)
         else:
             print('\tonly one revision found.')
-            
+
+        # if ancrev:
+        #     print('Checking/downloading ancestor revision data in Dropbox...')        
+        #     self.pull(ancrev, fp)
+
     def checkout(self, filepath):
         """Checkout/copy file from .roxly/ to working dir (wd).
 
@@ -142,7 +155,9 @@ class Clone(object):
         nrevs = int(self.nrevs)
         repo = self.repo
         
-        m = Misc(repo, None, self.debug)
+        fp = self._get_filepath(src_url)
+
+        m = Misc(repo, fp, self.debug)
 
         if nrevs > NREVS_MAX:
             print('Warning: max number of revisions for free service is %s' % NREVS_MAX)
@@ -152,21 +167,29 @@ class Clone(object):
 
         self.init()
 
-        fp = self._get_filepath(src_url)
-
         self._check_url_form(fp)
 
         self._check_fp_exists(fp)
 
         dbx = DbxOps(self.repo, fp, self.debug)
-        ancrev = m.ancrev_get(fp, ROXLY_PROP_TEMPLATE_ID) #gbrox anc hash !rev
-        self._debug('debug clone: downloaded ancestor hash=%s' % ancrev[:8])
+        anchash = m.ancrev_get(fp, ROXLY_PROP_TEMPLATE_ID)
+        self._debug('clone: downloaded ancestor propgrp hash=%s' % anchash[:8])
 
-        m.mmdb_populate(src_url, nrevs, ancrev)
+        ## delay hash2rev mapn till needed (by merge3), so store hash in mmdb
+        # ancrev = m.hash2rev(anchash)
+        # if ancrev:
+        #     self._debug('clone: ancestor rev=%s' % ancrev[:8])
+        # if not ancrev:
+        #     print('Warning: ancestor hash/rev not found, no 3-way merge is possible.')
+        #     print('Warning: 2-way merge is still possible: roxly merge2 --help')
+            
+        m.mmdb_populate(src_url, nrevs, anchash)
 
         m.repohome_files_put(fp.strip('/'))
 
-        self._get_revs(fp, nrevs)
+        (h, h1) = self._get_revs_md_logem(fp, nrevs)
+        
+        self._get_revs_data(fp, h, h1)
 
         self.checkout(fp)
 
