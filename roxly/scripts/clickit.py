@@ -114,8 +114,8 @@ def log(roxly, oneline, recent, filepath):
               help='Defaults to HEAD (latest rev in Dropbox) ... ditto --reva.')
 @click.argument('filepath')
 @click.pass_obj
-def merge(roxly, dry_run, merge_cmd, reva, revb, filepath):
-    roxly.merge(dry_run, merge_cmd, reva, revb, filepath)
+def merge3(roxly, dry_run, merge_cmd, reva, revb, filepath):
+    roxly.merge3(dry_run, merge_cmd, reva, revb, filepath)
 
 @cli.command(help='Run 2-way merge (by hand). Default: (emacsclient) ediff HEADMINUS1 HEAD')
 @click.option('--dry-run/--no-dry-run', default=False)

@@ -49,7 +49,7 @@ class Roxly():
     def cat(self, cat_cmd, rev, filepath):
         c = Cat(self.repo, cat_cmd, filepath, self.debug).cat(rev)        
             
-    def rox_checkout(self, filepath):
+    def checkout(self, filepath):
         Clone(dry_run, src_url, nrevs, self.repo, self.debug).checkout(filepath)
     
     def clone(self, dry_run, src_url, nrevs):
@@ -61,7 +61,7 @@ class Roxly():
     def log(self, oneline, recent, filepath):
         Log(self.repo, filepath, self.debug).log(oneline, recent)
 
-    def merge(self, dry_run, merge_cmd, reva, revb, filepath):
+    def merge3(self, dry_run, merge_cmd, reva, revb, filepath):
         Merge(self.repo, dry_run, merge_cmd, reva, revb, filepath, self.debug).merge3()
 
     def merge3_rc(self, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath):
