@@ -2,6 +2,7 @@
 from itertools import filterfalse
 import pickledb
 import os
+import sys
 
 import attr
 
@@ -185,7 +186,7 @@ class Misc(object):
 
         ind_path = pn.index() + '/' + fp
         if not os.path.isfile(ind_path):
-            sys.exit('error: file does not exist in index (staging area): %s'
+            sys.exit('Warning: file -- %s -- does not exist in index (staging area). Try: roxly add --help'
                      % fp)
 
         os.unlink(ind_path)

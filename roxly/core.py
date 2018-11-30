@@ -43,8 +43,8 @@ class Roxly():
         self.debug = debug
         self.repo = os.getcwd() if roxly_repo == '.' else roxly_repo 
 
-    def rox_add(self, dry_run, filepath):
-        Push(self.repo, dry_run, None, None, filepath, self.debug).add()
+    def add(self, filepath):
+        Push(self.repo, None, None, None, filepath, self.debug).add()
 
     def cat(self, cat_cmd, rev, filepath):
         c = Cat(self.repo, cat_cmd, filepath, self.debug).cat(rev)        
@@ -70,14 +70,14 @@ class Roxly():
               reva, revb,
               filepath, self.debug).merge3_rc(emacsclient_path, mergerc_cmd)
 
-    def rox_merge2(self, dry_run, emacsclient_path, merge_cmd, reva, revb, filepath):
-        Merge3(self.repo, dry_run, merge_cmd,
+    def merge2(self, dry_run, emacsclient_path, merge_cmd, reva, revb, filepath):
+        Merge(self.repo, dry_run, merge_cmd,
                reva, revb, filepath,  self.debug).merge2(emacsclient_path)
 
     def rox2_push(self, dry_run, addmemaybe, post_push_clone, filepath):
         Push(self.repo, dry_run, addmemaybe, post_push_clone, filepath, self.debug).push()
 
-    def rox_reset(self, filepath):
+    def reset(self, filepath):
         Misc(self.repo, filepath, self.debug).reset()
     
     def status(self, filepath):
