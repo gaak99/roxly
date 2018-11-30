@@ -50,7 +50,7 @@ class Roxly():
         c = Cat(self.repo, cat_cmd, filepath, self.debug).cat(rev)        
             
     def checkout(self, filepath):
-        Clone(dry_run, src_url, nrevs, self.repo, self.debug).checkout(filepath)
+        Clone(False, None, 0, self.repo, self.debug).checkout(filepath)
     
     def clone(self, dry_run, src_url, nrevs):
         Clone(dry_run, src_url, nrevs, self.repo, self.debug).clone()

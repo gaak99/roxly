@@ -164,7 +164,7 @@ def mergerc(roxly, dry_run, emacsclient_path, mergerc_cmd, reva, revb, filepath)
 def push(roxly, dry_run, add, post_push_clone, filepath):
     roxly.push(dry_run, add, post_push_clone, filepath)
     
-@cli.command(help='Copy file from .roxly/ to working dir. If staged version exists revert working dir one to it instead.')
+@cli.command(help='Copy file from .roxly/ to working dir (will quietly revert any non-staged changes). If staged version exists revert working dir one to it instead.')
 @click.argument('filepath', required=False, default=None)
 @click.pass_obj
 def checkout(roxly, filepath):
