@@ -84,9 +84,9 @@ class Clone(object):
         self._debug('_get_revs_md_logem: ret h=%s, h1=%s' % (h, h1))
         return h, h1
 
-    #def _get_revs_data(self, filepath, head, headminus1, ancrev):
-    def _get_revs_data(self, filepath, head, headminus1):
-        # Download head/headminus1 revs data
+    #def _get_revs_data(self, filepath, head, headminus1):
+    def _get_revs_data(self, filepath, head, headminus1, ancrev):
+        # Download head/headminus1/ancrev revs data
         fp = filepath
         
         print('Checking/downloading 2 latest revisions data in Dropbox...')
@@ -97,9 +97,9 @@ class Clone(object):
         else:
             print('\tonly one revision found.')
 
-        # if ancrev:
-        #     print('Checking/downloading ancestor revision data in Dropbox...')        
-        #     self.pull(ancrev, fp)
+        if ancrev:
+            print('Checking/downloading ancestor revision data in Dropbox...')        
+            self.pull(ancrev, fp)
 
     def checkout(self, filepath):
         """Checkout/copy file from .roxly/ to working dir (wd).
@@ -173,23 +173,23 @@ class Clone(object):
 
         dbx = DbxOps(self.repo, fp, self.debug)
         anchash = m.ancrev_get(fp, ROXLY_PROP_TEMPLATE_ID)
-        self._debug('clone: downloaded ancestor propgrp hash=%s' % anchash[:8])
+        self._debug('clone(): downloaded ancestor propgrp hash=%s' % anchash[:8])
 
-        ## delay hash2rev mapn till needed (by merge3), so store hash in mmdb
-        # ancrev = m.hash2rev(anchash)
-        # if ancrev:
-        #     self._debug('clone: ancestor rev=%s' % ancrev[:8])
-        # if not ancrev:
-        #     print('Warning: ancestor hash/rev not found, no 3-way merge is possible.')
-        #     print('Warning: 2-way merge is still possible: roxly merge2 --help')
-            
+        ## save anc hash not rev cuz rev may not be avail
         m.mmdb_populate(src_url, nrevs, anchash)
 
         m.repohome_files_put(fp.strip('/'))
 
         (h, h1) = self._get_revs_md_logem(fp, nrevs)
         
-        self._get_revs_data(fp, h, h1)
+        ## Try to get anc rev, if it fails dont worry about it now
+        ancrev = m.hash2rev(anchash)
+        if ancrev:
+            self._debug('clone(): ancestor rev=%s' % ancrev[:8])
+        else:
+            self._debug('clone(): ancestor rev not found')
+
+        self._get_revs_data(fp, h, h1, ancrev)
 
         self.checkout(fp)
 

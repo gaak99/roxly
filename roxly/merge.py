@@ -223,6 +223,7 @@ class Merge(object):
         self._check_revs(anc_rev)
 
         ## All 3 revs look sane, make sure we have local copies.
+        ## Clone.clone will probably already have downloaded these.
         pn.pull_me_maybe(reva)
         pn.pull_me_maybe(revb)
         pn.pull_me_maybe(anc_rev)
