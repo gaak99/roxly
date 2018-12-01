@@ -74,7 +74,7 @@ class Roxly():
         Merge(self.repo, dry_run, merge_cmd,
                reva, revb, filepath,  self.debug).merge2(emacsclient_path)
 
-    def rox2_push(self, dry_run, addmemaybe, post_push_clone, filepath):
+    def push(self, dry_run, addmemaybe, post_push_clone, filepath):
         Push(self.repo, dry_run, addmemaybe, post_push_clone, filepath, self.debug).push()
 
     def reset(self, filepath):

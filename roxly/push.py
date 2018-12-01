@@ -49,6 +49,8 @@ class Push(object):
         
         if self.dry_run:
             return
+
+        ##gbtodo if wt==head abort
         
         make_sure_path_exists(index_path)
         
@@ -74,6 +76,7 @@ class Push(object):
         self._debug('_upload_one_path: %s' % fp)
 
         dbx = DbxOps(self.repo, fp, self.debug)
+        log = Log(self.repo, fp, self.debug)
         
         with open(local_path, 'rb') as f:
             print("Uploading staged " + fp + " to Dropbox as " +
@@ -96,6 +99,12 @@ class Push(object):
         index_dir = pn.index()
         local_path = index_path = index_dir + '/' + fp
 
+        if not os.path.isfile(index_path):
+            if self.addmemaybe:
+                self._add_one_path()
+            else:
+                sys.exit('Warning: file -- %s -- is not in index (not staged). See: roxly push --help' % fp)
+            
         # Skip if no change from current rev
         logs = log.get()
         head = logs[0]
@@ -106,6 +115,9 @@ class Push(object):
             self._debug('debug push one path: %s' % local_path)
             sys.exit('Warning: so no push needed.')
 
+        if self.dry_run:
+            return
+        
         hash = calc_dropbox_content_hash(local_path)
         f = self._ancrev_prop_group_factory(ROXLY_PROP_ANCREV_NAME)
         pg = f(hash)
@@ -114,9 +126,6 @@ class Push(object):
         #ancout = "(ancestor_rev=%s)" % (hash[:8])
         ancout = "(ancestor_hash=%s)" % (hash[:8])
         self._upload_one_path(fp, local_path, rem_path, ancout, pg)
-        
-        if self.dry_run:
-            return
         
         os.remove(index_path)
         
@@ -141,11 +150,11 @@ class Push(object):
 
         if fp.startswith('dropbox:'):
             print('Warning: file should be local path not url')
-        if not self.addmemaybe:
-            sys.exit('Warning: %s not in index. Try push --add.' % fp)
-                    
-        if self.addmemaybe:
-            self._add_one_path()
+        # if not self.addmemaybe:
+        #     sys.exit('Warning: %s not in index. Try push --add.' % fp)
+
+        # if self.addmemaybe:
+        #     self._add_one_path()
 
         self._push_one_path()
 
