@@ -111,8 +111,12 @@ class Push(object):
         (rev, date, size, hash) = head.split(ROXLYSEP1)
         head_path = pn.by_rev(rev)
         if not self.dry_run and filecmp.cmp(index_path, head_path):
-            print('Warning: no change between working dir version and HEAD (latest version cloned).')
-            self._debug('debug push one path: %s' % local_path)
+            #print('Warning: no change between working dir version and HEAD (latest version cloned).')
+            print('Warning: no change between index (staged) version and HEAD (latest version cloned).')
+            self._debug('debug push one path: index=%s' % index_path)
+            self._debug('debug push one path: head=%s' % head_path)
+            self._debug('debug push one path: removing index version')
+            os.remove(index_path)
             sys.exit('Warning: so no push needed.')
 
         if self.dry_run:
@@ -170,12 +174,16 @@ class Push(object):
             self._debug('debug post_push_clone true')
 
         dropbox_url = m.get_mmval('remote_origin')
+        # if not dropbox_url:
+        #     sys.exit('Internal error: push() cant get dropbox url for post-pull clone')
+
+        self._debug('push(): url=%s' % dropbox_url)
         if dropbox_url and self.post_push_clone:
             nrevs = m.get_mmval('nrevs')
             m.save_repo()
             print('Re-cloning to get current metadata/data from Dropbox...')
             #self.rox_clone(dry_run, dropbox_url, nrevs)
-            cln = Clone(dry_run, dropbox_url, nrevs, self.repo, self.debug)
+            cln = Clone(self.dry_run, dropbox_url, nrevs, self.repo, self.debug)
             cln.clone()
 
         # Our work is done here praise $DIETY as the user syncs on Orgzly.

@@ -157,6 +157,8 @@ class Clone(object):
         
         fp = self._get_filepath(src_url)
 
+        self._debug('clone(): start url=%s, nrevs=%s, repo=%s' % (src_url, nrevs, repo))
+        
         m = Misc(repo, fp, self.debug)
 
         if nrevs > NREVS_MAX:
