@@ -116,8 +116,8 @@ class DbxOps(object):
     def upload_file(self, fd, rem_path, rev, pg):
         try:
             #dbx.files_upload(f.read(), rem_path, mode=WriteMode('overwrite'),
-            dbx.files_upload(fd.read(), rem_path, mode=WriteMode.update(rev),
-                             property_groups=[pg])
+            self.dbx.files_upload(fd.read(), rem_path, mode=WriteMode.update(rev),
+                                  property_groups=[pg])
             print(' done.')
         except ApiError as err:
             # This checks for the specific error where a user doesn't have
