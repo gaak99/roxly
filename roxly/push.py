@@ -43,7 +43,7 @@ class Push(object):
         modded = not filecmp.cmp(p_wt, p_head)
 
         if not modded:
-            sys.exit('Warning: working dir version is same as HEAD. Not added. See: roxly status --help')
+            sys.exit('Warning: no change so not added. See: roxly status --help')
 
         ##gbtodo check if p_indx already exists?
 
@@ -105,7 +105,7 @@ class Push(object):
             if self.addmemaybe:
                 self._add_one_path()
             else:
-                sys.exit('Warning: file -- %s -- is not in index (not staged). See: roxly push --help' % fp)
+                sys.exit('Warning: no file in index (not staged). See: roxly push --help')
             
         # Skip if no change from current rev
         logs = log.get()
