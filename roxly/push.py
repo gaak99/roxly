@@ -37,24 +37,26 @@ class Push(object):
         self._debug('_add_one_path: %s' % fp)
 
         pn = PathName(self.repo, fp, self.debug)
-
-        index_path = pn.index()
+        m = Misc(self.repo, fp, self.debug)
         
-        dp = os.path.dirname(fp)
-        if dp:
-            index_path = index_path + '/' + dp
-            
-        wt = pn.wt_path()
-        self._debug('debug _add_one_path cp %s %s' % (wt, index_path))
+        p_wt, p_indx, p_head = m.get_fp_triple(fp) # p_indx==None
+        modded = not filecmp.cmp(p_wt, p_head)
+
+        if not modded:
+            sys.exit('Warning: working dir version is same as HEAD. Not added. See: roxly status --help')
+
+        ##gbtodo check if p_indx already exists?
+
+        index_path = pn.index() + '/' + os.path.dirname(fp)            
+        self._debug('debug _add_one_path mkdir %s ' % (index_path))
+        make_sure_path_exists(index_path)
+
+        self._debug('debug _add_one_path cp %s %s' % (p_wt, index_path))
         
         if self.dry_run:
             return
-
-        ##gbtodo if wt==head abort
         
-        make_sure_path_exists(index_path)
-        
-        os.system('cp %s %s' % (wt, index_path))
+        os.system('cp %s %s' % (p_wt, index_path))
 
     def add(self):
         """Copy file from wd to index (aka staging area)"""
@@ -110,14 +112,16 @@ class Push(object):
         head = logs[0]
         (rev, date, size, hash) = head.split(ROXLYSEP1)
         head_path = pn.by_rev(rev)
+        self._debug('debug push one path: index=%s' % index_path)
+        self._debug('debug push one path: head=%s' % head_path)
         if not self.dry_run and filecmp.cmp(index_path, head_path):
             #print('Warning: no change between working dir version and HEAD (latest version cloned).')
-            print('Warning: no change between index (staged) version and HEAD (latest version cloned).')
             self._debug('debug push one path: index=%s' % index_path)
             self._debug('debug push one path: head=%s' % head_path)
             self._debug('debug push one path: removing index version')
             os.remove(index_path)
-            sys.exit('Warning: so no push needed.')
+            print('Warning: no change between index (staged) version and HEAD (latest version cloned).')
+            sys.exit('Warning: so no push needed. --add opt needed? See: roxly push --help')
 
         if self.dry_run:
             return

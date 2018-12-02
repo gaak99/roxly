@@ -49,11 +49,14 @@ class Status(object):
 
         mods = 0
         for p in ifp_l:
-            self._debug('debug status2 p=%s' % p)
+            self._debug('debug status _staged_not_pushed p=%s' % p)
             modded = False
-            p_wt, p_ind, p_head = m.get_fp_triple(p)
-            if p_ind and p_head:
-                modded = not filecmp.cmp(p_ind, p_head)
+            p_wt, p_indx, p_head = m.get_fp_triple(p)
+            self._debug('debug status _staged_not_pushed  wt: %s' % p_wt)
+            self._debug('debug status _staged_not_pushed indx: %s' % p_indx)
+            self._debug('debug status _staged_not_pushed head: %s' % p_head)
+            if p_indx and p_head:
+                modded = not filecmp.cmp(p_indx, p_head)
             if modded:
                 mods += 1
                 if mods == 1:
@@ -68,18 +71,19 @@ class Status(object):
         for p in ifp_l:
             self._debug('debug status2 p=%s' % p)
             modded = False
-            p_wt, p_ind, p_head = m.get_fp_triple(p)
+            p_wt, p_indx, p_head = m.get_fp_triple(p)
             self._debug('debug status triple wt: %s' % p_wt)
+            self._debug('debug status triple indx: %s' % p_indx)
             self._debug('debug status triple head: %s' % p_head)
             if not p_wt:
                 pass
                 # Damned if ya do
                 # print('warning: file does not exist in wt: %s' % p)
-            elif p_ind:
-                modded = not filecmp.cmp(p_wt, p_ind)
+            elif p_indx:
+                self._debug('debug status else p_indx')
+                modded = not filecmp.cmp(p_wt, p_indx)
             else:
-                self._debug('debug status else wt: %s' % p_wt)
-                self._debug('debug status else head: %s' % p_head)
+                self._debug('debug status else')
                 modded = not filecmp.cmp(p_wt, p_head)
             if modded:
                 mods += 1
